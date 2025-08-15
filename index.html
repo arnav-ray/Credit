@@ -63,13 +63,55 @@
         const Target = ({ className }) => <Icon className={className}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></Icon>;
         const Bank = ({ className }) => <Icon className={className}><path d="M3 22h18"></path><path d="M6 18V9.52c0-1.3.8-2.47 2-2.88l4-1.6c.7-.28 1.3-.28 2 0l4 1.6c1.2.41 2 1.58 2 2.88V18"></path><path d="M6 18h12"></path><path d="M12 18V9"></path></Icon>;
 
+        // --- New Bell Curve Chart Component ---
+        const BellCurveChart = ({ userScore }) => {
+            const distribution = [5, 8, 15, 22, 25, 15, 8, 2]; // Represents % of population in each bucket
+            const labels = ['<45', '45-55', '55-65', '65-75', '75-85', '85-95', '95-100', '>100'];
+            
+            const getBucketIndex = (score) => {
+                if (score < 45) return 0;
+                if (score < 55) return 1;
+                if (score < 65) return 2;
+                if (score < 75) return 3;
+                if (score < 85) return 4;
+                if (score < 95) return 5;
+                if (score <= 100) return 6;
+                return 7;
+            };
+
+            const userBucketIndex = getBucketIndex(userScore);
+
+            return (
+                <div>
+                    <div className="flex items-end justify-center h-48 space-x-1 p-4">
+                        {distribution.map((height, index) => (
+                            <div key={index} className="flex-1 flex flex-col items-center justify-end">
+                                <div 
+                                    className={`w-full rounded-t-md transition-all duration-500 ${index === userBucketIndex ? 'bg-blue-600' : 'bg-gray-300'}`}
+                                    style={{ height: `${height * 3.5}px` }}
+                                ></div>
+                                <div className={`text-xs mt-1 font-medium ${index === userBucketIndex ? 'text-blue-600' : 'text-gray-500'}`}>
+                                    {labels[index]}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="text-center text-sm text-gray-600 mt-2">
+                        Your Score: <span className="font-bold text-blue-600">{userScore}</span>
+                    </div>
+                </div>
+            );
+        };
+
+
         // --- Main Application Component ---
         function App() {
-          const [currency, setCurrency] = React.useState('USD');
-          const [activeTab, setActiveTab] = React.useState('financial');
-          const [hasCalculated, setHasCalculated] = React.useState(false);
-          const [showGlossary, setShowGlossary] = React.useState(false);
-          const [showBreakdown, setShowBreakdown] = React.useState(false);
+          const { useState } = React;
+          const [currency, setCurrency] = useState('USD');
+          const [activeTab, setActiveTab] = useState('financial');
+          const [hasCalculated, setHasCalculated] = useState(false);
+          const [showGlossary, setShowGlossary] = useState(false);
+          const [showBreakdown, setShowBreakdown] = useState(false);
           
           const currencyConfig = {
             USD: { symbol: '$', name: 'US Dollar', country: 'USA', ppp_adjustment: 1.0, country_risk: 0.5 },
@@ -77,16 +119,16 @@
             INR: { symbol: '₹', name: 'Indian Rupee', country: 'India', ppp_adjustment: 0.28, country_risk: 3.2 }
           };
 
-          const [inputs, setInputs] = React.useState({
-            individualIncome: 60000, familyIncome: 90000, securedDebt: 25000, unsecuredDebt: 8000, bankSavings: 15000, equityInvestments: 20000, realEstate: 200000, bullionAssets: 5000, cryptoAssets: 10000, employmentTenure: 36, creditCardPayments: 95, loanPayments: 88, rentPayments: 98, governmentPayments: 95, age: 35, numberOfChildren: 1, marriedStatus: 1, educationLevel: 3, restaurantSpending: 400, vacationSpending: 3000, sinSpending: 50, groceriesSpending: 400, kidsEducationSpending: 200, clothingSpending: 150, kidsActivitiesSpending: 100, carMaintenance: 150, lifeInsurance: 100, medicalInsurance: 300, utilityPayments: 98, avgMonthlyIncome: 5000, avgMonthEndBalance: 2500, budgetingTool: 2, financialGoals: { retirement: true, emergencyFund: true, downPayment: false, payOffDebt: true, travel: false }, requestedLimit: 10000, residencyStatus: 0
+          const [inputs, setInputs] = useState({
+            individualIncome: 60000, familyIncome: 90000, securedDebt: 25000, unsecuredDebt: 8000, bankSavings: 15000, equityInvestments: 20000, realEstate: 200000, bullionAssets: 5000, cryptoAssets: 10000, employmentTenure: 36, creditCardPayments: 95, loanPayments: 88, rentPayments: 98, governmentPayments: 95, age: 35, numberOfChildren: 1, marriedStatus: 1, educationLevel: 3, restaurantSpending: 400, vacationSpending: 3000, sinSpending: 50, groceriesSpending: 400, kidsEducationSpending: 200, clothingSpending: 150, kidsActivitiesSpending: 100, carMaintenance: 150, lifeInsurance: 100, medicalInsurance: 300, utilityPayments: 98, avgMonthlyIncome: 5000, avgMonthEndBalance: 2500, budgetingTool: 2, financialGoals: { retirement: true, emergencyFund: true, downPayment: false, payOffDebt: true, travel: false }, requestedLimit: 10000, residencyStatus: 0, subscriptionServices: 120
           });
 
-          const [results, setResults] = React.useState({
+          const [results, setResults] = useState({
             overallRiskScore: 0, riskCategory: '', riskGrade: '', recommendedLimit: 0, expectedLoss: 0, defaultProbability: 0, recommendations: [], warningFlags: []
           });
           
-          const [calculationBreakdown, setCalculationBreakdown] = React.useState(null);
-          const [improvementReport, setImprovementReport] = React.useState("");
+          const [calculationBreakdown, setCalculationBreakdown] = useState(null);
+          const [improvementReport, setImprovementReport] = useState("");
 
           const glossary = { "PPP": "Purchasing Power Parity.", "PD": "Probability of Default.", "LGD": "Loss Given Default.", "EAD": "Exposure at Default.", "Expected Loss": "PD x LGD x EAD." };
           const formatCurrency = (amount) => currencyConfig[currency].symbol + Math.round(amount).toLocaleString();
@@ -141,12 +183,16 @@
             let riskCategory, riskGrade;
             if (countryAdjustedScore >= 85) { riskCategory = 'Excellent'; riskGrade = 'AAA'; } else if (countryAdjustedScore >= 75) { riskCategory = 'Very Good'; riskGrade = 'AA'; } else if (countryAdjustedScore >= 65) { riskCategory = 'Good'; riskGrade = 'A'; } else if (countryAdjustedScore >= 55) { riskCategory = 'Fair'; riskGrade = 'BBB'; } else if (countryAdjustedScore >= 45) { riskCategory = 'Poor'; riskGrade = 'BB'; } else { riskCategory = 'Very Poor'; riskGrade = 'B'; }
 
+            const monthlyExpenses = (inputs.groceriesSpending || 0) + (inputs.kidsEducationSpending || 0) + (inputs.clothingSpending || 0) + (inputs.kidsActivitiesSpending || 0) + (inputs.carMaintenance || 0) + (inputs.lifeInsurance || 0) + (inputs.medicalInsurance || 0) + (inputs.restaurantSpending || 0) + (inputs.subscriptionServices || 0) + (inputs.sinSpending || 0) + ((inputs.vacationSpending || 0) / 12);
+            const emergencyFundTarget3Months = formatCurrency(monthlyExpenses * 3);
+            const emergencyFundTarget6Months = formatCurrency(monthlyExpenses * 6);
+
             let report = `Based on your inputs, your risk profile is **'${riskCategory}'**.\n\nHere are personalized steps to improve your score:\n\n`;
-            if (paymentHistoryScore < 95) report += `* **Priority 1: Perfect Your Payment History.** This is 40% of your score. Set up automatic payments for all bills to ensure you never miss a due date. Even one late payment can have a significant impact.\n`;
-            if (debtToIncomeRatio > 36) report += `* **Priority 2: Reduce Debt-to-Income Ratio.** Your DTI of ${formatNumber(debtToIncomeRatio)}% is high. Focus on paying down high-interest unsecured debt. This is a major factor in the 'Financial Health' component.\n`;
-            if (emergencyMonths < 3) report += `* **Build Your Emergency Fund.** You have ~${formatNumber(emergencyMonths, 1)} months of expenses saved. Aim for 3-6 months.\n`;
-            if (inputs.budgetingTool < 2) report += `* **Adopt Budgeting Tools.** Using an app provides clear insights and improves financial planning.\n`;
-            if (report.split('*').length - 1 === 0) report += "* **Maintain Good Habits:** Your financial profile is strong. Continue your current practices.\n";
+            if (paymentHistoryScore < 95) report += `* **Perfect Your Payment History (Highest Impact).** This is 40% of your score. To avoid accidental late payments, log in to your online banking or your providers' websites (for credit cards, loans, utilities) and set up rules to automatically pay at least the minimum amount due each month from your bank account.\n`;
+            if (debtToIncomeRatio > 36) report += `* **Reduce Debt-to-Income Ratio.** Your DTI of ${formatNumber(debtToIncomeRatio)}% is high. Focus on paying down high-interest unsecured debt. This is a major factor in the 'Financial Health' component.\n`;
+            if (emergencyMonths < 3) report += `* **Build Your Emergency Fund.** You have ~${formatNumber(emergencyMonths, 1)} months of expenses saved. Based on your spending, you should aim for a fund between **${emergencyFundTarget3Months} and ${emergencyFundTarget6Months}** to cover 3-6 months of expenses.\n`;
+            if (inputs.budgetingTool < 2) report += `* **Adopt Budgeting Tools.** Using a dedicated app (like Mint, YNAB, etc.) provides clear insights into your cash flow and is a positive signal of proactive financial management.\n`;
+            if (report.split('*').length - 1 === 0) report += "* **Maintain Good Habits:** Your financial profile is strong. Continue your current practices to maintain your excellent score.\n";
             setImprovementReport(report);
 
             const recommendedLimit = Math.max(inputs.requestedLimit * 0.3, Math.min(inputs.requestedLimit, (pppAdjustedIncome * 0.25) * (countryAdjustedScore / 100)));
@@ -155,7 +201,7 @@
             if (paymentHistoryScore < 90) warningFlags.push("Missed payments detected");
             if (emergencyMonths < 3) warningFlags.push("Insufficient emergency fund");
             const recommendations = [];
-            if (emergencyMonths < 3) recommendations.push("Build emergency fund to 3-6 months");
+            if (emergencyMonths < 3) recommendations.push(`Build emergency fund to ${emergencyFundTarget3Months} - ${emergencyFundTarget6Months}`);
             if (inputs.budgetingTool < 2) recommendations.push("Adopt digital budgeting tools");
             if (paymentHistoryScore < 95) recommendations.push("Set up automatic bill payments");
             setResults({ overallRiskScore: Math.round(countryAdjustedScore), riskCategory, riskGrade, recommendedLimit, expectedLoss, defaultProbability: formatNumber(probabilityOfDefault * 100), recommendations, warningFlags });
@@ -181,7 +227,7 @@
 
               <div className="flex justify-center my-8"><button onClick={handleCalculateRisk} className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg flex items-center gap-2"><Calculator className="w-5 h-5" />Calculate Risk Assessment</button></div>
 
-              {hasCalculated && (<div className="space-y-6"><div className="grid grid-cols-1 lg:grid-cols-3 gap-6"><Card className="lg:col-span-1"><CardHeader><h3 className="text-lg font-semibold text-gray-800">Risk Assessment Results</h3></CardHeader><CardContent className="space-y-4"><div className="text-center p-6 bg-gray-100 rounded-lg"><div className="text-5xl font-bold mb-2 text-gray-800">{results.overallRiskScore}</div><div className={`text-lg font-semibold mb-1 ${results.overallRiskScore >= 75 ? 'text-green-600' : results.overallRiskScore >= 55 ? 'text-yellow-600' : 'text-red-600'}`}>{results.riskCategory}</div><div className="text-sm text-gray-600">Grade: {results.riskGrade}</div><div className="text-xs text-gray-500 mt-2">Default Probability: {results.defaultProbability}%</div></div><div className="space-y-3 pt-2"><div><h4 className="font-semibold text-sm text-gray-600">Recommended Credit Limit:</h4><div className="text-2xl font-bold text-blue-600">{formatCurrency(results.recommendedLimit)}</div></div><div><h4 className="font-semibold text-sm text-gray-600">Expected Loss:</h4><div className="text-lg font-bold text-red-600">{formatCurrency(results.expectedLoss)}</div></div></div></CardContent></Card><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Warning Flags</h3></CardHeader><CardContent>{results.warningFlags.length > 0 ? (<ul className="text-sm space-y-2">{results.warningFlags.map((flag, idx) => (<li key={idx} className="flex items-start gap-2 text-red-700"><AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>{flag}</span></li>))}</ul>) : (<div className="text-green-600 text-sm flex items-center gap-2"><Shield className="w-4 h-4" />No major warning flags detected.</div>)}</CardContent></Card><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Recommendations</h3></CardHeader><CardContent>{results.recommendations.length > 0 ? (<ul className="text-sm space-y-2">{results.recommendations.map((rec, idx) => (<li key={idx} className="flex items-start gap-2 text-blue-700"><Info className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>{rec}</span></li>))}</ul>) : (<div className="text-green-600 text-sm flex items-center gap-2"><TrendingUp className="w-4 h-4" />Your financial profile looks good!</div>)}</CardContent></Card></div>
+              {hasCalculated && (<div className="space-y-6"><div className="grid grid-cols-1 lg:grid-cols-3 gap-6"><Card className="lg:col-span-1"><CardHeader><h3 className="text-lg font-semibold text-gray-800">Risk Assessment Results</h3></CardHeader><CardContent className="space-y-4"><div className="text-center p-6 bg-gray-100 rounded-lg"><div className="text-5xl font-bold mb-2 text-gray-800">{results.overallRiskScore}</div><div className={`text-lg font-semibold mb-1 ${results.overallRiskScore >= 75 ? 'text-green-600' : results.overallRiskScore >= 55 ? 'text-yellow-600' : 'text-red-600'}`}>{results.riskCategory}</div><div className="text-sm text-gray-600">Grade: {results.riskGrade}</div><div className="text-xs text-gray-500 mt-2">Default Probability: {results.defaultProbability}%</div></div><div className="space-y-3 pt-2"><div><h4 className="font-semibold text-sm text-gray-600">Recommended Credit Limit:</h4><div className="text-2xl font-bold text-blue-600">{formatCurrency(results.recommendedLimit)}</div></div><div><h4 className="font-semibold text-sm text-gray-600">Expected Loss:</h4><div className="text-lg font-bold text-red-600">{formatCurrency(results.expectedLoss)}</div></div></div></CardContent></Card><Card className="lg:col-span-2"><CardHeader><h3 className="text-lg font-semibold text-gray-800">Peer Comparison</h3></CardHeader><CardContent><p className="text-sm text-gray-600 mb-2">This chart shows your score relative to a typical population distribution. This is a simulation and not based on live user data.</p><BellCurveChart userScore={results.overallRiskScore} /></CardContent></Card></div>
               <Card><CardHeader><div className="flex items-center gap-2"><FileText className="w-5 h-5 text-gray-700" /><h3 className="text-lg font-semibold text-gray-800">Credit Improvement Report</h3></div></CardHeader><CardContent><div className="text-sm text-gray-700 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: improvementReport.replace(/\*\s(.*?)\n/g, '<li class="flex items-start gap-2 mb-2"><span class="mt-1 text-green-500">✔</span><span>$1</span></li>').replace(/<li>/g, '<ul class="list-none p-0"><li>') + '</ul>' }}></div></CardContent></Card>
               <Card><CardHeader><button onClick={() => setShowBreakdown(!showBreakdown)} className="w-full flex justify-between items-center text-left"><h3 className="text-lg font-semibold text-gray-800">Calculation Transparency</h3><ChevronDown className={`w-5 h-5 transition-transform ${showBreakdown ? 'rotate-180' : ''}`} /></button></CardHeader>{showBreakdown && calculationBreakdown && (<CardContent className="space-y-4"><CalculationStep data={calculationBreakdown.paymentHistory} /><CalculationStep data={calculationBreakdown.financialHealth} /><CalculationStep data={calculationBreakdown.behavioral} /><CalculationStep data={calculationBreakdown.finalScore} /><AdvancedMetricsStep data={calculationBreakdown.advancedMetrics} /></CardContent>)}</Card></div>)}
               
