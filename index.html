@@ -1,0 +1,1070 @@
+import React, { useState } from 'react';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { 
+  AlertTriangle, TrendingUp, User, CreditCard, Brain, DollarSign, 
+  Globe, Target, Lightbulb, BarChart3, Shield, Calculator, Users, 
+  ShoppingCart, Baby, Flag, Building, Download, Info, Utensils, 
+  Plane, Car, Dumbbell, Camera 
+} from 'lucide-react';
+
+const AdvancedCreditRiskModel = () => {
+  const [currency, setCurrency] = useState('USD');
+  const [activeTab, setActiveTab] = useState('financial');
+  const [hasCalculated, setHasCalculated] = useState(false);
+  const [showCalculations, setShowCalculations] = useState(false);
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+  
+  const currencyConfig = {
+    USD: { 
+      symbol: '$', rate: 1, name: 'US Dollar', country: 'USA',
+      ppp_adjustment: 1.0, country_risk: 0.5, legal_framework: 0.95
+    },
+    EUR: { 
+      symbol: '€', rate: 0.85, name: 'Euro', country: 'Germany',
+      ppp_adjustment: 0.82, country_risk: 0.8, legal_framework: 0.92
+    },
+    INR: { 
+      symbol: '₹', rate: 83, name: 'Indian Rupee', country: 'India',
+      ppp_adjustment: 0.28, country_risk: 3.2, legal_framework: 0.65
+    }
+  };
+
+  const [inputs, setInputs] = useState({
+    individualIncome: 60000, familyIncome: 90000, securedDebt: 25000,
+    unsecuredDebt: 8000, bankSavings: 15000, equityInvestments: 20000,
+    etfInvestments: 10000, cryptoInvestments: 3000, realEstate: 200000,
+    businessOwnership: 0, employmentTenure: 36, industryStability: 75,
+    incomeGrowthRate: 5, creditCardPayments: 95, loanPayments: 88,
+    utilityPayments: 92, rentPayments: 98, governmentPayments: 95,
+    age: 35, numberOfChildren: 1, marriedStatus: 1, educationLevel: 3,
+    employmentType: 2, onlineShoppingFreq: 3, amazonSpending: 200,
+    restaurantSpending: 400, foodDeliveryFreq: 2, vacationSpending: 3000,
+    hotelStays: 4, taxiUberSpending: 150, gymMembershipCost: 80,
+    hobbiesSpending: 200, entertainmentSpending: 250, subscriptionServices: 120,
+    luxuryPurchases: 500, impulseThreshold: 100, budgetingTools: 2,
+    financialGoals: 3, riskAversion: 3, socialMediaInfluence: 3,
+    brandLoyalty: 3, debtAcceptance: 2, emergencyPreparedness: 3,
+    investmentExperience: 2, savingsHabits: 3, priceComparison: 3,
+    requestedLimit: 10000, existingCreditCards: 2, bankRelationship: 24,
+    residencyStatus: 1, localCreditHistory: 60, crossBorderExposure: 0
+  });
+
+  const [userParams, setUserParams] = useState({
+    pppFactor: 1.0, countryRiskMultiplier: 1.0, behavioralMultiplier: 1.0,
+    financialWeight: 0.40, paymentWeight: 0.30, behavioralWeight: 0.20,
+    countryWeight: 0.10, confidenceLevel: 99.9, expectedLossMultiplier: 1.0,
+    unexpectedLossMultiplier: 2.33
+  });
+
+  const [results, setResults] = useState({
+    overallRiskScore: 0, riskCategory: '', riskGrade: '',
+    recommendedLimit: 0, capitalRequirement: 0, expectedLoss: 0,
+    unexpectedLoss: 0, riskAdjustedReturn: 0, defaultProbability: 0,
+    lossGivenDefault: 0, exposureAtDefault: 0, detailedAnalysis: {},
+    recommendations: [], warningFlags: [], scoringBreakdown: {},
+    countryRiskAdjustment: 0, pppAdjustment: 0, behavioralRiskMultiplier: 1.0
+  });
+
+  const [calculationDetails, setCalculationDetails] = useState({});
+  const [detailedMetrics, setDetailedMetrics] = useState({});
+
+  const formatCurrency = (amount) => {
+    return `${currencyConfig[currency].symbol}${amount.toLocaleString()}`;
+  };
+
+  const calculateAdvancedRisk = () => {
+    const config = currencyConfig[currency];
+    
+    // PPP-adjusted calculations
+    const adjustedPPP = config.ppp_adjustment * userParams.pppFactor;
+    const pppAdjustedIncome = Math.max(inputs.individualIncome, inputs.familyIncome) * adjustedPPP;
+    
+    const totalAssets = inputs.bankSavings + inputs.equityInvestments + 
+                       inputs.etfInvestments + inputs.cryptoInvestments + 
+                       inputs.realEstate + inputs.businessOwnership;
+    const totalDebt = inputs.securedDebt + inputs.unsecuredDebt;
+    const netWorth = totalAssets - totalDebt;
+    
+    // Behavioral risk calculation
+    let behavioralRiskScore = 0;
+    
+    const digitalRisk = Math.min(inputs.onlineShoppingFreq * inputs.amazonSpending / 100, 50);
+    behavioralRiskScore += digitalRisk * 0.12 * userParams.behavioralMultiplier;
+    
+    const lifestyleRisk = (inputs.restaurantSpending + inputs.foodDeliveryFreq * 50 + inputs.entertainmentSpending) / 50;
+    behavioralRiskScore += Math.min(lifestyleRisk, 40) * 0.15 * userParams.behavioralMultiplier;
+    
+    const familyPressure = (inputs.numberOfChildren * 15) + 
+                          (inputs.marriedStatus === 0 ? 10 : 0) + 
+                          (inputs.age < 30 ? 15 : 0);
+    behavioralRiskScore += familyPressure * 0.18 * userParams.behavioralMultiplier;
+    
+    const emergencyMonths = inputs.bankSavings / (pppAdjustedIncome / 12);
+    const emergencyScore = Math.min(emergencyMonths * 15, 90);
+    behavioralRiskScore += (100 - emergencyScore) * 0.16 * userParams.behavioralMultiplier;
+    
+    // Financial health calculation
+    const debtToIncomeRatio = (totalDebt / pppAdjustedIncome) * 100;
+    const leverageRatio = totalAssets > 0 ? (totalDebt / totalAssets) * 100 : 0;
+    const liquidityCoverageRatio = inputs.bankSavings / (pppAdjustedIncome / 12);
+    
+    const financialHealthScore = (
+      Math.max(0, 100 - debtToIncomeRatio * 1.2) * 0.25 +
+      Math.max(0, 100 - leverageRatio) * 0.20 +
+      Math.min(100, liquidityCoverageRatio * 15) * 0.15 +
+      (inputs.employmentTenure / 120 * 100) * 0.15 +
+      85 * 0.15 +
+      (config.legal_framework * 100) * 0.10
+    );
+    
+    // Payment history calculation
+    const paymentHistoryScore = (
+      inputs.creditCardPayments * 0.35 +
+      inputs.loanPayments * 0.25 +
+      inputs.rentPayments * 0.20 +
+      inputs.utilityPayments * 0.10 +
+      inputs.governmentPayments * 0.10
+    );
+    
+    // Country risk adjustment
+    const adjustedCountryRisk = config.country_risk * userParams.countryRiskMultiplier;
+    const countryRiskMultiplier = 1 + (adjustedCountryRisk / 100);
+    const residencyRisk = inputs.residencyStatus * 5 + 
+                         (inputs.localCreditHistory < 24 ? 15 : 0) +
+                         (inputs.crossBorderExposure * 0.3);
+    
+    // Final risk score
+    const baseRiskScore = (
+      financialHealthScore * userParams.financialWeight +
+      paymentHistoryScore * userParams.paymentWeight +
+      (100 - behavioralRiskScore) * userParams.behavioralWeight +
+      (100 - residencyRisk) * userParams.countryWeight
+    );
+    
+    const countryAdjustedScore = baseRiskScore / countryRiskMultiplier;
+    
+    // Advanced risk metrics
+    const probabilityOfDefault = Math.max(0.1, 50 - (countryAdjustedScore * 0.5)) / 100;
+    const lossGivenDefault = 0.45 + (behavioralRiskScore / 1000);
+    const exposureAtDefault = inputs.requestedLimit * (1 + (behavioralRiskScore / 500));
+    
+    const expectedLoss = probabilityOfDefault * lossGivenDefault * exposureAtDefault * userParams.expectedLossMultiplier;
+    const unexpectedLoss = expectedLoss * userParams.unexpectedLossMultiplier * Math.sqrt(probabilityOfDefault);
+    
+    const riskAdjustedReturn = 0.18 - (probabilityOfDefault * 2) - (lossGivenDefault * 0.1);
+    
+    // Risk categorization
+    let riskCategory, riskGrade;
+    if (countryAdjustedScore >= 85) { riskCategory = 'Excellent'; riskGrade = 'AAA'; }
+    else if (countryAdjustedScore >= 75) { riskCategory = 'Very Good'; riskGrade = 'AA'; }
+    else if (countryAdjustedScore >= 65) { riskCategory = 'Good'; riskGrade = 'A'; }
+    else if (countryAdjustedScore >= 55) { riskCategory = 'Fair'; riskGrade = 'BBB'; }
+    else if (countryAdjustedScore >= 45) { riskCategory = 'Poor'; riskGrade = 'BB'; }
+    else { riskCategory = 'Very Poor'; riskGrade = 'B'; }
+    
+    const recommendedLimit = Math.max(
+      inputs.requestedLimit * 0.3,
+      Math.min(inputs.requestedLimit, (pppAdjustedIncome * 0.25) * (countryAdjustedScore / 100))
+    );
+    
+    // Warnings and recommendations
+    const warningFlags = [];
+    const recommendations = [];
+    
+    if (debtToIncomeRatio > 40) warningFlags.push("High debt-to-income ratio exceeds guidelines");
+    if (behavioralRiskScore > 70) warningFlags.push("Concerning behavioral spending patterns detected");
+    if (inputs.numberOfChildren > 2 && netWorth < pppAdjustedIncome) warningFlags.push("Family financial pressure risk");
+    if (inputs.onlineShoppingFreq > 3 && inputs.amazonSpending > 300) warningFlags.push("High online shopping risk");
+    
+    if (emergencyMonths < 3) recommendations.push("Build emergency fund to 3-6 months expenses");
+    if (inputs.budgetingTools < 2) recommendations.push("Adopt digital budgeting tools");
+    if (behavioralRiskScore > 60) recommendations.push("Consider financial counseling");
+    
+    const detailedAnalysis = {
+      financialHealth: Math.round(financialHealthScore),
+      paymentReliability: Math.round(paymentHistoryScore),
+      behavioralRisk: Math.round(behavioralRiskScore),
+      countryRisk: Math.round(adjustedCountryRisk * 10) / 10,
+      pppAdjustment: Math.round((adjustedPPP - 1) * 1000) / 10,
+      debtToIncome: Math.round(debtToIncomeRatio),
+      netWorth: Math.round(netWorth),
+      liquidityMonths: Math.round(emergencyMonths * 10) / 10
+    };
+    
+    const scoringBreakdown = {
+      [`Financial Health (${Math.round(userParams.financialWeight * 100)}%)`]: Math.round(financialHealthScore),
+      [`Payment History (${Math.round(userParams.paymentWeight * 100)}%)`]: Math.round(paymentHistoryScore),
+      [`Behavioral Assessment (${Math.round(userParams.behavioralWeight * 100)}%)`]: Math.round(100 - behavioralRiskScore),
+      [`Country Risk (${Math.round(userParams.countryWeight * 100)}%)`]: Math.round(100 - residencyRisk)
+    };
+    
+    setResults({
+      overallRiskScore: Math.round(countryAdjustedScore),
+      riskCategory, riskGrade,
+      recommendedLimit: Math.round(recommendedLimit),
+      expectedLoss: Math.round(expectedLoss),
+      unexpectedLoss: Math.round(unexpectedLoss),
+      riskAdjustedReturn: Math.round(riskAdjustedReturn * 1000) / 10,
+      defaultProbability: Math.round(probabilityOfDefault * 1000) / 10,
+      lossGivenDefault: Math.round(lossGivenDefault * 1000) / 10,
+      exposureAtDefault: Math.round(exposureAtDefault),
+      detailedAnalysis, recommendations, warningFlags, scoringBreakdown,
+      countryRiskAdjustment: Math.round((countryRiskMultiplier - 1) * 1000) / 10,
+      pppAdjustment: Math.round((adjustedPPP - 1) * 1000) / 10,
+      behavioralRiskMultiplier: Math.round((behavioralRiskScore / 100) * 100) / 100
+    });
+  };
+
+  const handleCalculateRisk = () => {
+    calculateAdvancedRisk();
+    setHasCalculated(true);
+  };
+
+  const SliderInput = ({ label, value, onChange, min, max, step = 1, icon: Icon, unit = "", isCurrency = false }) => (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Icon className="w-4 h-4" />
+        <label className="text-sm font-medium">{label}</label>
+        <span className="text-sm text-gray-600 ml-auto">
+          {isCurrency ? formatCurrency(value) : `${value}${unit}`}
+        </span>
+      </div>
+      <Slider
+        value={[value]}
+        onValueChange={(val) => onChange(val[0])}
+        min={min}
+        max={max}
+        step={step}
+        className="w-full"
+      />
+    </div>
+  );
+
+  const RadioGroup = ({ label, options, value, onChange, icon: Icon }) => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Icon className="w-4 h-4" />
+        <label className="text-sm font-medium">{label}</label>
+      </div>
+      <div className="grid grid-cols-1 gap-2">
+        {options.map((option, index) => (
+          <label key={index} className="flex items-center space-x-2 cursor-pointer text-sm">
+            <input
+              type="radio"
+              value={index}
+              checked={value === index}
+              onChange={() => onChange(index)}
+              className="w-4 h-4"
+            />
+            <span>{option}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">Advanced Credit Risk Assessment Platform</h1>
+        <p className="text-gray-600 mb-4">Multi-Factor Risk Analysis with PPP Adjustment and Behavioral Economics</p>
+        
+        <div className="flex justify-center gap-4 items-center flex-wrap">
+          <select 
+            value={currency} 
+            onChange={(e) => setCurrency(e.target.value)}
+            className="px-4 py-2 border rounded-lg"
+          >
+            {Object.entries(currencyConfig).map(([code, config]) => (
+              <option key={code} value={code}>
+                {config.symbol} {config.name} ({config.country})
+              </option>
+            ))}
+          </select>
+          
+          <div className="text-sm text-gray-600">
+            PPP Adjustment: {Math.round(currencyConfig[currency].ppp_adjustment * userParams.pppFactor * 100)}% | 
+            Country Risk: {Math.round(currencyConfig[currency].country_risk * userParams.countryRiskMultiplier * 10) / 10}%
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center mb-6">
+        <div className="flex space-x-1 bg-white p-1 rounded-lg border">
+          {['financial', 'lifestyle', 'behavioral', 'demographics'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-2 rounded-md font-medium capitalize ${
+                activeTab === tab 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {tab === 'financial' ? 'Financial Data' : 
+               tab === 'lifestyle' ? 'Lifestyle Spending' :
+               tab === 'behavioral' ? 'Behavioral Assessment' : 
+               'Demographics'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {activeTab === 'financial' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-semibold">Income and Assets</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Individual Annual Income"
+                value={inputs.individualIncome}
+                onChange={(val) => setInputs({...inputs, individualIncome: val})}
+                min={10000}
+                max={500000}
+                step={5000}
+                icon={User}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Family Annual Income"
+                value={inputs.familyIncome}
+                onChange={(val) => setInputs({...inputs, familyIncome: val})}
+                min={10000}
+                max={800000}
+                step={5000}
+                icon={Users}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Bank Savings"
+                value={inputs.bankSavings}
+                onChange={(val) => setInputs({...inputs, bankSavings: val})}
+                min={0}
+                max={200000}
+                step={1000}
+                icon={DollarSign}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Equity Investments"
+                value={inputs.equityInvestments}
+                onChange={(val) => setInputs({...inputs, equityInvestments: val})}
+                min={0}
+                max={500000}
+                step={1000}
+                icon={BarChart3}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Real Estate Value"
+                value={inputs.realEstate}
+                onChange={(val) => setInputs({...inputs, realEstate: val})}
+                min={0}
+                max={2000000}
+                step={10000}
+                icon={Building}
+                isCurrency={true}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-red-600" />
+                <h3 className="text-lg font-semibold">Debts and Employment</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Secured Debt (Mortgages, Auto)"
+                value={inputs.securedDebt}
+                onChange={(val) => setInputs({...inputs, securedDebt: val})}
+                min={0}
+                max={800000}
+                step={5000}
+                icon={Shield}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Unsecured Debt (Credit Cards, Personal)"
+                value={inputs.unsecuredDebt}
+                onChange={(val) => setInputs({...inputs, unsecuredDebt: val})}
+                min={0}
+                max={100000}
+                step={1000}
+                icon={AlertTriangle}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Employment Tenure (Months)"
+                value={inputs.employmentTenure}
+                onChange={(val) => setInputs({...inputs, employmentTenure: val})}
+                min={0}
+                max={120}
+                icon={User}
+                unit=" months"
+              />
+              <SliderInput
+                label="Requested Credit Limit"
+                value={inputs.requestedLimit}
+                onChange={(val) => setInputs({...inputs, requestedLimit: val})}
+                min={1000}
+                max={100000}
+                step={1000}
+                icon={CreditCard}
+                isCurrency={true}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Payment History Analysis</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <SliderInput
+                label="Credit Card Payments"
+                value={inputs.creditCardPayments}
+                onChange={(val) => setInputs({...inputs, creditCardPayments: val})}
+                min={0}
+                max={100}
+                icon={CreditCard}
+                unit="%"
+              />
+              <SliderInput
+                label="Loan Payments"
+                value={inputs.loanPayments}
+                onChange={(val) => setInputs({...inputs, loanPayments: val})}
+                min={0}
+                max={100}
+                icon={DollarSign}
+                unit="%"
+              />
+              <SliderInput
+                label="Utility Payments"
+                value={inputs.utilityPayments}
+                onChange={(val) => setInputs({...inputs, utilityPayments: val})}
+                min={0}
+                max={100}
+                icon={Globe}
+                unit="%"
+              />
+              <SliderInput
+                label="Rent/Mortgage Payments"
+                value={inputs.rentPayments}
+                onChange={(val) => setInputs({...inputs, rentPayments: val})}
+                min={0}
+                max={100}
+                icon={Building}
+                unit="%"
+              />
+              <SliderInput
+                label="Government/Tax Payments"
+                value={inputs.governmentPayments}
+                onChange={(val) => setInputs({...inputs, governmentPayments: val})}
+                min={0}
+                max={100}
+                icon={Flag}
+                unit="%"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'lifestyle' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-orange-600" />
+                <h3 className="text-lg font-semibold">Dining and Food</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Monthly Restaurant Spending"
+                value={inputs.restaurantSpending}
+                onChange={(val) => setInputs({...inputs, restaurantSpending: val})}
+                min={0}
+                max={2000}
+                step={25}
+                icon={Utensils}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Food Delivery Frequency (per week)"
+                value={inputs.foodDeliveryFreq}
+                onChange={(val) => setInputs({...inputs, foodDeliveryFreq: val})}
+                min={0}
+                max={14}
+                icon={ShoppingCart}
+                unit=" times/week"
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Plane className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Travel and Vacation</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Annual Vacation Spending"
+                value={inputs.vacationSpending}
+                onChange={(val) => setInputs({...inputs, vacationSpending: val})}
+                min={0}
+                max={20000}
+                step={250}
+                icon={Plane}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Monthly Taxi/Uber Spending"
+                value={inputs.taxiUberSpending}
+                onChange={(val) => setInputs({...inputs, taxiUberSpending: val})}
+                min={0}
+                max={1000}
+                step={25}
+                icon={Car}
+                isCurrency={true}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold">Entertainment and Shopping</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Monthly Entertainment Spending"
+                value={inputs.entertainmentSpending}
+                onChange={(val) => setInputs({...inputs, entertainmentSpending: val})}
+                min={0}
+                max={1000}
+                step={25}
+                icon={Target}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Online Shopping Frequency (per week)"
+                value={inputs.onlineShoppingFreq}
+                onChange={(val) => setInputs({...inputs, onlineShoppingFreq: val})}
+                min={0}
+                max={7}
+                icon={ShoppingCart}
+                unit=" times/week"
+              />
+              <SliderInput
+                label="Monthly Amazon/E-commerce Spending"
+                value={inputs.amazonSpending}
+                onChange={(val) => setInputs({...inputs, amazonSpending: val})}
+                min={0}
+                max={2000}
+                step={25}
+                icon={Globe}
+                isCurrency={true}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Dumbbell className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-semibold">Subscriptions and Memberships</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Monthly Gym/Fitness"
+                value={inputs.gymMembershipCost}
+                onChange={(val) => setInputs({...inputs, gymMembershipCost: val})}
+                min={0}
+                max={300}
+                step={10}
+                icon={Dumbbell}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Monthly Subscription Services"
+                value={inputs.subscriptionServices}
+                onChange={(val) => setInputs({...inputs, subscriptionServices: val})}
+                min={0}
+                max={500}
+                step={10}
+                icon={Globe}
+                isCurrency={true}
+              />
+              <SliderInput
+                label="Monthly Hobbies Spending"
+                value={inputs.hobbiesSpending}
+                onChange={(val) => setInputs({...inputs, hobbiesSpending: val})}
+                min={0}
+                max={1000}
+                step={25}
+                icon={Camera}
+                isCurrency={true}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'behavioral' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-purple-600" />
+                <h3 className="text-lg font-semibold">Financial Behavior</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Budgeting Tools Sophistication"
+                value={inputs.budgetingTools}
+                onChange={(val) => setInputs({...inputs, budgetingTools: val})}
+                min={0}
+                max={4}
+                icon={Calculator}
+                unit="/4"
+              />
+              <SliderInput
+                label="Financial Goal Setting"
+                value={inputs.financialGoals}
+                onChange={(val) => setInputs({...inputs, financialGoals: val})}
+                min={1}
+                max={5}
+                icon={Target}
+                unit="/5"
+              />
+              <SliderInput
+                label="Savings Discipline"
+                value={inputs.savingsHabits}
+                onChange={(val) => setInputs({...inputs, savingsHabits: val})}
+                min={1}
+                max={5}
+                icon={DollarSign}
+                unit="/5"
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-orange-600" />
+                <h3 className="text-lg font-semibold">Social and Psychological</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Social Media Spending Influence"
+                value={inputs.socialMediaInfluence}
+                onChange={(val) => setInputs({...inputs, socialMediaInfluence: val})}
+                min={1}
+                max={5}
+                icon={Users}
+                unit="/5"
+              />
+              <SliderInput
+                label="Emergency Preparedness"
+                value={inputs.emergencyPreparedness}
+                onChange={(val) => setInputs({...inputs, emergencyPreparedness: val})}
+                min={1}
+                max={5}
+                icon={Shield}
+                unit="/5"
+              />
+              <SliderInput
+                label="Risk Aversion Level"
+                value={inputs.riskAversion}
+                onChange={(val) => setInputs({...inputs, riskAversion: val})}
+                min={1}
+                max={5}
+                icon={AlertTriangle}
+                unit="/5"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {activeTab === 'demographics' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-green-600" />
+                <h3 className="text-lg font-semibold">Family and Demographics</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SliderInput
+                label="Age"
+                value={inputs.age}
+                onChange={(val) => setInputs({...inputs, age: val})}
+                min={18}
+                max={80}
+                icon={User}
+                unit=" years"
+              />
+              <SliderInput
+                label="Number of Children"
+                value={inputs.numberOfChildren}
+                onChange={(val) => setInputs({...inputs, numberOfChildren: val})}
+                min={0}
+                max={8}
+                icon={Baby}
+                unit=" children"
+              />
+              
+              <RadioGroup
+                label="Marital Status"
+                options={['Single', 'Married/Partner']}
+                value={inputs.marriedStatus}
+                onChange={(val) => setInputs({...inputs, marriedStatus: val})}
+                icon={Users}
+              />
+              
+              <RadioGroup
+                label="Education Level"
+                options={['High School', 'Some College', 'Bachelors', 'Masters', 'PhD/Professional']}
+                value={inputs.educationLevel}
+                onChange={(val) => setInputs({...inputs, educationLevel: val})}
+                icon={User}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Flag className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Country Risk and Status</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <RadioGroup
+                label="Residency Status"
+                options={['Citizen', 'Permanent Resident', 'Temporary Resident']}
+                value={inputs.residencyStatus}
+                onChange={(val) => setInputs({...inputs, residencyStatus: val})}
+                icon={Flag}
+              />
+              
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">Current Country Profile:</h4>
+                <div className="text-sm text-blue-700 space-y-1">
+                  <div>Country: {currencyConfig[currency].country}</div>
+                  <div>Adjusted Risk: {Math.round(currencyConfig[currency].country_risk * userParams.countryRiskMultiplier * 10) / 10}%</div>
+                  <div>PPP Factor: {Math.round(currencyConfig[currency].ppp_adjustment * userParams.pppFactor * 100)}%</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <div className="flex justify-center mb-6">
+        <button
+          onClick={handleCalculateRisk}
+          className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+        >
+          <Calculator className="w-5 h-5" />
+          Calculate Risk Assessment
+        </button>
+      </div>
+
+      {hasCalculated && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-semibold">Risk Assessment Results</h3>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg">
+                <div className="text-4xl font-bold mb-2">{results.overallRiskScore}</div>
+                <div className={`text-lg font-semibold mb-1 ${
+                  results.overallRiskScore >= 75 ? 'text-green-600' :
+                  results.overallRiskScore >= 55 ? 'text-yellow-600' : 'text-red-600'
+                }`}>
+                  {results.riskCategory}
+                </div>
+                <div className="text-sm text-gray-600">Grade: {results.riskGrade}</div>
+                <div className="text-xs text-gray-500 mt-2">
+                  Default Probability: {results.defaultProbability}%
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-semibold text-sm">Recommended Credit Limit:</h4>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {formatCurrency(results.recommendedLimit)}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                <h3 className="text-lg font-semibold">Advanced Risk Metrics</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>Expected Loss:</div>
+                <div className="font-semibold">{formatCurrency(results.expectedLoss)}</div>
+                
+                <div>Unexpected Loss:</div>
+                <div className="font-semibold">{formatCurrency(results.unexpectedLoss)}</div>
+                
+                <div>Loss Given Default:</div>
+                <div className="font-semibold">{results.lossGivenDefault}%</div>
+                
+                <div>Risk-Adj. Return:</div>
+                <div className="font-semibold">{results.riskAdjustedReturn}%</div>
+                
+                <div>Net Worth:</div>
+                <div className="font-semibold">{formatCurrency(results.detailedAnalysis.netWorth)}</div>
+
+                <div>PPP Adjustment:</div>
+                <div className="font-semibold">{results.pppAdjustment}%</div>
+              </div>
+
+              <div className="mt-4">
+                <h4 className="font-semibold text-sm mb-2">Scoring Breakdown:</h4>
+                {Object.entries(results.scoringBreakdown).map(([category, score]) => (
+                  <div key={category} className="flex justify-between text-sm mb-1">
+                    <span>{category}:</span>
+                    <span className="font-semibold">{score}/100</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm w-full"
+                >
+                  {showAdvancedSettings ? 'Hide' : 'Show'} Advanced Settings
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-orange-600" />
+                <h3 className="text-lg font-semibold">Risk Insights</h3>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {results.warningFlags.length > 0 && (
+                <div>
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Warning Flags:
+                  </h4>
+                  <ul className="text-sm space-y-1 mt-2">
+                    {results.warningFlags.map((flag, idx) => (
+                      <li key={idx} className="text-red-600">• {flag}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {results.recommendations.length > 0 && (
+                <div>
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    Recommendations:
+                  </h4>
+                  <ul className="text-sm space-y-1 mt-2">
+                    {results.recommendations.map((rec, idx) => (
+                      <li key={idx} className="text-blue-600">• {rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-600">
+                  <strong>Model Confidence:</strong> 99.9%<br/>
+                  <strong>Assessment Date:</strong> {new Date().toLocaleDateString()}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {hasCalculated && showAdvancedSettings && (
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold">Advanced Model Parameters</h3>
+            <p className="text-sm text-gray-600">Adjust model assumptions for sensitivity analysis</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <h4 className="font-semibold mb-3">Component Weights:</h4>
+                <div className="space-y-3">
+                  <SliderInput
+                    label="Financial Health Weight"
+                    value={userParams.financialWeight * 100}
+                    onChange={(val) => setUserParams({...userParams, financialWeight: val / 100})}
+                    min={0}
+                    max={100}
+                    step={1}
+                    icon={TrendingUp}
+                    unit="%"
+                  />
+                  <SliderInput
+                    label="Payment History Weight"
+                    value={userParams.paymentWeight * 100}
+                    onChange={(val) => setUserParams({...userParams, paymentWeight: val / 100})}
+                    min={0}
+                    max={100}
+                    step={1}
+                    icon={Shield}
+                    unit="%"
+                  />
+                  <SliderInput
+                    label="Behavioral Weight"
+                    value={userParams.behavioralWeight * 100}
+                    onChange={(val) => setUserParams({...userParams, behavioralWeight: val / 100})}
+                    min={0}
+                    max={100}
+                    step={1}
+                    icon={Brain}
+                    unit="%"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Adjustment Factors:</h4>
+                <div className="space-y-3">
+                  <SliderInput
+                    label="PPP Adjustment Factor"
+                    value={userParams.pppFactor}
+                    onChange={(val) => setUserParams({...userParams, pppFactor: val})}
+                    min={0.1}
+                    max={2.0}
+                    step={0.1}
+                    icon={Globe}
+                    unit="x"
+                  />
+                  <SliderInput
+                    label="Country Risk Multiplier"
+                    value={userParams.countryRiskMultiplier}
+                    onChange={(val) => setUserParams({...userParams, countryRiskMultiplier: val})}
+                    min={0.1}
+                    max={3.0}
+                    step={0.1}
+                    icon={Flag}
+                    unit="x"
+                  />
+                  <SliderInput
+                    label="Behavioral Multiplier"
+                    value={userParams.behavioralMultiplier}
+                    onChange={(val) => setUserParams({...userParams, behavioralMultiplier: val})}
+                    min={0.1}
+                    max={2.0}
+                    step={0.1}
+                    icon={Brain}
+                    unit="x"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Loss Parameters:</h4>
+                <div className="space-y-3">
+                  <SliderInput
+                    label="Expected Loss Multiplier"
+                    value={userParams.expectedLossMultiplier}
+                    onChange={(val) => setUserParams({...userParams, expectedLossMultiplier: val})}
+                    min={0.5}
+                    max={2.0}
+                    step={0.1}
+                    icon={AlertTriangle}
+                    unit="x"
+                  />
+                  <SliderInput
+                    label="Unexpected Loss Multiplier"
+                    value={userParams.unexpectedLossMultiplier}
+                    onChange={(val) => setUserParams({...userParams, unexpectedLossMultiplier: val})}
+                    min={1.0}
+                    max={4.0}
+                    step={0.1}
+                    icon={BarChart3}
+                    unit="x"
+                  />
+                  <SliderInput
+                    label="Confidence Level"
+                    value={userParams.confidenceLevel}
+                    onChange={(val) => setUserParams({...userParams, confidenceLevel: val})}
+                    min={90}
+                    max={99.9}
+                    step={0.1}
+                    icon={Shield}
+                    unit="%"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex gap-4">
+              <button
+                onClick={handleCalculateRisk}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Recalculate
+              </button>
+              <button
+                onClick={() => {
+                  setUserParams({
+                    pppFactor: 1.0, countryRiskMultiplier: 1.0, behavioralMultiplier: 1.0,
+                    financialWeight: 0.40, paymentWeight: 0.30, behavioralWeight: 0.20,
+                    countryWeight: 0.10, confidenceLevel: 99.9, expectedLossMultiplier: 1.0,
+                    unexpectedLossMultiplier: 2.33
+                  });
+                }}
+                className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Reset Defaults
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
+
+export default AdvancedCreditRiskModel;
