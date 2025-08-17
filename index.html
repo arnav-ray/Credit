@@ -149,7 +149,7 @@
                     <button onClick={() => setPerspective('borrower')} className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 flex items-center gap-2 ${perspective === 'borrower' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'}`}>
                         <User className="w-4 h-4" /> Borrower View
                     </button>
-                    <button onClick={() => setPerspective('lender')} className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 flex items-center gap-2 ${perspective === 'lender' ? 'bg-white text-blue-600 shadow' : 'text-gray-600'}`}>
+                    <button onClick={() => setPerspective('lender')} className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors duration-300 flex items-center gap-2 ${perspective === 'lender' ? 'bg-white text-indigo-600 shadow' : 'text-gray-600'}`}>
                         <Briefcase className="w-4 h-4" /> Lender View
                     </button>
                 </div>
@@ -263,9 +263,9 @@
 
                         {canConsolidate && (
                              <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                                <h4 className="font-semibold text-green-800">Opportunity: Debt Consolidation</h4>
-                                <p className="text-sm text-green-700">Your recommended unsecured limit of <strong className="text-green-900">{formatCurrency(unsecuredLimit)}</strong> appears sufficient to consolidate your existing <strong className="text-green-900">{formatCurrency(inputs.unsecuredDebt)}</strong> of unsecured debt. This could simplify your payments and potentially lower your interest rate.</p>
-                            </div>
+                                 <h4 className="font-semibold text-green-800">Opportunity: Debt Consolidation</h4>
+                                 <p className="text-sm text-green-700">Your recommended unsecured limit of <strong className="text-green-900">{formatCurrency(unsecuredLimit)}</strong> appears sufficient to consolidate your existing <strong className="text-green-900">{formatCurrency(inputs.unsecuredDebt)}</strong> of unsecured debt. This could simplify your payments and potentially lower your interest rate.</p>
+                             </div>
                         )}
 
                     </CardContent>
@@ -316,15 +316,151 @@
             );
         };
 
-        const AdvancedMetricsStep = ({ data }) => (<div className="p-4 bg-gray-50 rounded-lg border border-gray-200"><h4 className="font-semibold text-blue-800">{data.title}</h4><p className="text-xs text-gray-600 mt-1 mb-2">{data.explanation}</p><div className="space-y-2">{data.metrics.map(metric => (<div key={metric.name} className="text-xs bg-white p-2 rounded border"><div className="flex justify-between items-center"><strong className="text-gray-800">{metric.name}:</strong><span className="font-mono text-purple-700 font-bold">{metric.value}</span></div><p className="text-gray-500 mt-1">{metric.description}</p><p className="font-mono text-xs text-gray-400">({metric.formula})</p></div>))}</div></div>);
+        const AdvancedMetricsStep = ({ data }) => (
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h4 className="font-semibold text-indigo-800">{data.title}</h4>
+                <p className="text-xs text-gray-600 mt-1 mb-2">{data.explanation}</p>
+                <div className="space-y-2">
+                    {data.metrics.map(metric => (
+                        <div key={metric.name} className="text-xs bg-white p-2 rounded border">
+                            <div className="flex justify-between items-center">
+                                <strong className="text-gray-800">{metric.name}:</strong>
+                                <span className="font-mono text-purple-700 font-bold">{metric.value}</span>
+                            </div>
+                            <p className="text-gray-500 mt-1">{metric.description}</p>
+                            <p className="font-mono text-xs text-gray-400">({metric.formula})</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const StressTestResults = ({ baseScore, stressResults }) => {
+            if (!stressResults) return null;
+            return (
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Zap className="w-5 h-5 text-orange-500" />
+                            <h3 className="text-lg font-semibold text-gray-800">Economic Stress Test Results</h3>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="flex flex-col md:flex-row items-center justify-around text-center gap-4">
+                        <div>
+                            <div className="text-sm text-gray-500">Base Score</div>
+                            <div className="text-3xl font-bold text-gray-800">{baseScore}</div>
+                        </div>
+                        <div className="text-2xl font-light text-gray-400">→</div>
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <div className="text-sm text-red-700">Stressed Score</div>
+                            <div className="text-3xl font-bold text-red-600">{stressResults.stressedScore}</div>
+                        </div>
+                        <div className="md:pl-4 md:text-left">
+                            <h4 className="font-semibold text-gray-700">Stress Factors Applied:</h4>
+                            <ul className="list-disc pl-5 text-sm text-gray-600">
+                                {stressResults.reasons.map((reason, i) => <li key={i}>{reason}</li>)}
+                            </ul>
+                        </div>
+                    </CardContent>
+                </Card>
+            );
+        };
+
+        const StressTestLogic = ({ countryRisk, industryRisk }) => (
+            <Card>
+                <CardHeader><h3 className="text-lg font-semibold text-gray-800">Stress Test Model Logic</h3></CardHeader>
+                <CardContent>
+                    <p className="text-sm text-gray-600 mb-4">The stress test simulates the impact of a combined macroeconomic and sector-specific downturn on your credit score. The logic is transparent and based on the following formula and risk tables. <strong className="text-gray-800">Note: These risk factors are illustrative assumptions for educational purposes, based on general economic principles, not specific empirical data.</strong></p>
+                    <div className="p-3 bg-gray-100 rounded-lg text-center font-mono text-sm text-gray-800 mb-4">
+                        Stressed Score = Base Score / (1 + Country Risk + Industry Risk)
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 className="font-semibold text-gray-700 mb-2">Macroeconomic Country Risk Scenarios</h4>
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-gray-100"><tr><th className="p-2">Country</th><th className="p-2">Scenario</th><th className="p-2">Risk Factor</th></tr></thead>
+                                <tbody>
+                                    {Object.entries(countryRisk).map(([key, { name, scenario, risk }]) => (
+                                        <tr key={key} className="border-b"><td className="p-2">{name}</td><td className="p-2">{scenario}</td><td className="p-2 font-mono text-red-600">{risk * 100}%</td></tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold text-gray-700 mb-2">Sector-Specific Industry Risk Scenarios</h4>
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-gray-100"><tr><th className="p-2">Industry</th><th className="p-2">Scenario</th><th className="p-2">Risk Factor</th></tr></thead>
+                                <tbody>
+                                    {Object.entries(industryRisk).map(([key, { name, scenario, risk }]) => (
+                                        <tr key={key} className="border-b"><td className="p-2">{name}</td><td className="p-2">{scenario}</td><td className="p-2 font-mono text-red-600">{parseFloat((risk * 100).toFixed(1))}%</td></tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+        
+        // --- UX IMPROVEMENT: New component to guide the user ---
+        const QuickStartGuide = () => (
+            <Card className="bg-blue-50 border-blue-200">
+                <CardHeader className="border-blue-200"><h3 className="text-lg font-semibold text-blue-800">Quick Start Guide</h3></CardHeader>
+                <CardContent className="text-sm text-blue-700 space-y-3">
+                    <p>Welcome to the OpenCredit Platform! This tool helps you understand credit risk from two perspectives:</p>
+                    <ul className="list-disc pl-5 space-y-2">
+                        <li><strong className="text-blue-900">Borrower View:</strong> See your estimated score, understand what it means, and get a personalized report on how to improve it.</li>
+                        <li><strong className="text-blue-900">Lender View:</strong> See the financial metrics a lender would focus on, including risk-adjusted limits and economic stress tests.</li>
+                    </ul>
+                    <p><strong className="text-blue-900">Your Workflow:</strong></p>
+                    <ol className="list-decimal pl-5 space-y-2">
+                        <li>Navigate through the <strong className="text-blue-900">blue input tabs</strong> (Financial, Payment History, etc.) to enter your data.</li>
+                        <li>Click the <strong className="text-blue-900">"Calculate Risk Assessment"</strong> button.</li>
+                        <li>Explore your results in the <strong className="text-green-800">green output tabs</strong> (Results, Model Logic).</li>
+                    </ol>
+                </CardContent>
+            </Card>
+        );
+
+        // --- UX IMPROVEMENT: New "About" section component ---
+        const AboutSection = () => (
+            <Card>
+                <CardHeader><h3 className="text-lg font-semibold text-gray-800">About the OpenCredit Platform</h3></CardHeader>
+                <CardContent className="space-y-4 text-sm text-gray-700">
+                    <div>
+                        <h4 className="font-semibold text-gray-800 mb-1">The Problem: Credit is a Black Box</h4>
+                        <p>For most people, credit scores are confusing numbers assigned by opaque agencies. It's often unclear how these scores are calculated, what factors are most important, and what specific, actionable steps can be taken to improve them. This lack of transparency creates anxiety for borrowers and can lead to inefficient decision-making for lenders who rely solely on traditional metrics.</p>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-gray-800 mb-1">The Solution: A Transparent, Educational Model</h4>
+                        <p>The OpenCredit Platform is an open-source, educational tool designed to demystify credit risk. It provides a fully transparent model that allows users to see exactly how different inputs affect their overall score. By offering two distinct views—Borrower and Lender—it serves two primary use cases:</p>
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li><strong>For Individuals (Borrower View):</strong> To learn about the key drivers of creditworthiness, receive a personalized improvement plan, and understand how lenders might perceive their financial health before they apply for credit.</li>
+                            <li><strong>For Professionals & Students (Lender View):</strong> To explore a simplified, Basel III-aligned risk model, understand concepts like Probability of Default (PD) and Expected Loss (EL), and see how macroeconomic stress testing can impact a borrower's profile.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-gray-800 mb-1">Key Parameters & Assumptions</h4>
+                        <p>The model is built on a weighted average of three core components, inspired by industry-standard models:</p>
+                        <ol className="list-decimal pl-5 mt-2 space-y-1">
+                            <li><strong>Payment History (40% Weight):</strong> The most critical factor. Assumes that past repayment behavior is the strongest predictor of future reliability.</li>
+                            <li><strong>Financial Health (30% Weight):</strong> Focuses on quantitative metrics like Debt-to-Income (DTI) and Leverage ratios. It assumes that lower debt levels relative to income and assets indicate a greater capacity to handle new credit.</li>
+                            <li><strong>Behavioral & Stability (30% Weight):</strong> A proxy for financial habits and life stability. It assumes that proactive financial management (e.g., budgeting) and stable life circumstances (e.g., employment tenure) correlate with lower risk.</li>
+                        </ol>
+                        <p className="mt-2">All calculations are deterministic and based on the formulas shown in the "Model Logic" tab. The model has not been statistically validated against real-world loan data and should be used for educational purposes only.</p>
+                    </div>
+                </CardContent>
+            </Card>
+        );
 
         function App() {
           const { useState, useEffect } = React;
           const [perspective, setPerspective] = useState('borrower');
           const [currency, setCurrency] = useState('EUR');
-          const [activeTab, setActiveTab] = useState('financial');
+          const [activeTab, setActiveTab] = useState('about'); // Start on the new 'about' tab
           const [hasCalculated, setHasCalculated] = useState(false);
-          
+          const [stressResults, setStressResults] = useState(null);
+
           const getScoreEquivalent = (score) => {
               if (score >= 85) return { fico: '780-850', cibil: '800+', schufa: '97.5%+' };
               if (score >= 75) return { fico: '720-779', cibil: '750-799', schufa: '95%-97.5%' };
@@ -340,8 +476,25 @@
           };
 
           const [inputs, setInputs] = useState({
-            individualIncome: 60000, familyIncome: 90000, securedDebt: 25000, unsecuredDebt: 8000, bankSavings: 15000, equityInvestments: 20000, realEstate: 200000, bullionAssets: 5000, cryptoAssets: 10000, employmentTenure: 36, creditCardPayments: 95, loanPayments: 88, rentPayments: 98, governmentPayments: 95, utilityPayments: 98, age: 35, numberOfChildren: 1, marriedStatus: 1, educationLevel: 3, restaurantSpending: 400, vacationSpending: 3000, sinSpending: 50, groceriesSpending: 400, kidsEducationSpending: 200, clothingSpending: 150, kidsActivitiesSpending: 100, carMaintenance: 150, lifeInsurance: 100, medicalInsurance: 300, medicalBills: 50, donations: 20, otherExpenses: 100, avgMonthlyIncome: 5000, avgMonthEndBalance: 2500, budgetingTool: 2, financialGoals: { retirement: true, emergencyFund: true, downPayment: false, payOffDebt: true, travel: false }, requestedLimit: 10000, residencyStatus: 0, subscriptionServices: 120
+            individualIncome: 60000, familyIncome: 90000, securedDebt: 25000, unsecuredDebt: 8000, bankSavings: 15000, equityInvestments: 20000, realEstate: 200000, bullionAssets: 5000, cryptoAssets: 10000, employmentTenure: 36, creditCardPayments: 95, loanPayments: 88, rentPayments: 98, governmentPayments: 95, utilityPayments: 98, age: 35, numberOfChildren: 1, marriedStatus: 1, educationLevel: 3, restaurantSpending: 400, vacationSpending: 3000, sinSpending: 50, groceriesSpending: 400, kidsEducationSpending: 200, clothingSpending: 150, kidsActivitiesSpending: 100, carMaintenance: 150, lifeInsurance: 100, medicalInsurance: 300, medicalBills: 50, donations: 20, otherExpenses: 100, avgMonthlyIncome: 5000, avgMonthEndBalance: 2500, budgetingTool: 2, financialGoals: { retirement: true, emergencyFund: true, downPayment: false, payOffDebt: true, travel: false }, requestedLimit: 10000, residencyStatus: 0, subscriptionServices: 120,
+            industry: 6 // Default to 'Other'
           });
+
+          const countryRiskScenarios = {
+              USD: { name: 'USA', scenario: 'Broad Market Shock & Interest Rate Hike', risk: 0.10 },
+              EUR: { name: 'Germany', scenario: 'Energy Crisis & Supply Chain Disruption', risk: 0.08 },
+              INR: { name: 'India', scenario: 'Inflationary Pressure & Rupee Devaluation', risk: 0.12 }
+          };
+
+          const industryRiskScenarios = {
+              0: { name: 'Technology', scenario: 'Venture Capital funding dries up, major layoffs', risk: 0.15 },
+              1: { name: 'Healthcare', scenario: 'Stable demand, low risk', risk: 0.02 },
+              2: { name: 'Finance', scenario: 'High sensitivity to market shocks', risk: 0.12 },
+              3: { name: 'Manufacturing', scenario: 'High sensitivity to supply chain issues', risk: 0.09 },
+              4: { name: 'Retail/Hospitality', scenario: 'Highly sensitive to consumer spending drops', risk: 0.14 },
+              5: { name: 'Consulting', scenario: 'Corporate budgets tighten, projects cancelled', risk: 0.11 },
+              6: { name: 'Other', scenario: 'General economic baseline risk', risk: 0.05 }
+          };
 
           const [results, setResults] = useState({
             overallRiskScore: 0, riskCategory: '', riskGrade: '', recommendedLimit: 0, expectedLoss: 0, defaultProbability: 0, recommendations: [], warningFlags: [], debtToIncomeRatio: 0, leverageRatio: 0
@@ -352,6 +505,30 @@
 
           const formatCurrency = (amount) => currencyConfig[currency].symbol + Math.round(amount).toLocaleString();
           const formatNumber = (num, places = 2) => parseFloat(num.toFixed(places));
+
+          const runStressTest = (baseScore, industry, currentCurrency) => {
+              const countryRisk = countryRiskScenarios[currentCurrency];
+              const industryRisk = industryRiskScenarios[industry];
+              
+              let stressFactor = 1.0;
+              let reasons = [];
+
+              if (countryRisk && countryRisk.risk > 0) {
+                  stressFactor += countryRisk.risk;
+                  reasons.push(`Country Risk (${countryRisk.name}): ${countryRisk.scenario}`);
+              }
+              if (industryRisk && industryRisk.risk > 0) {
+                  stressFactor += industryRisk.risk;
+                  reasons.push(`Industry Risk (${industryRisk.name}): ${industryRisk.scenario}`);
+              }
+
+              if (stressFactor > 1.0) {
+                  const stressedScore = Math.round(baseScore / stressFactor);
+                  setStressResults({ stressedScore, reasons });
+              } else {
+                  setStressResults(null);
+              }
+          };
 
           const calculateAdvancedRisk = () => {
             const config = currencyConfig[currency];
@@ -364,18 +541,9 @@
             const totalAssets = inputs.bankSavings + inputs.equityInvestments + inputs.realEstate + riskAdjustedBullion + riskAdjustedCrypto;
             const totalDebt = inputs.securedDebt + inputs.unsecuredDebt;
             
-            // --- Component 1: Payment History ---
             const paymentHistoryScore = (inputs.creditCardPayments * 0.30) + (inputs.loanPayments * 0.25) + (inputs.rentPayments * 0.20) + (inputs.utilityPayments * 0.15) + (inputs.governmentPayments * 0.10);
-            breakdown.paymentHistory = { 
-                title: "Component 1: Payment History (40% Weight)", 
-                explanation: "This is the most critical factor. It reflects your reliability in meeting past obligations.", 
-                formula: "Weighted average of on-time payments.", 
-                calculation: `(${inputs.creditCardPayments}*0.30) + (${inputs.loanPayments}*0.25) + (${inputs.rentPayments}*0.20) + (${inputs.utilityPayments}*0.15) + (${inputs.governmentPayments}*0.10)`,
-                result: `Score: ${formatNumber(paymentHistoryScore)} / 100`, 
-                rationale: "Weights are aligned with industry models like FICO, where timely payments on traditional credit (cards, loans) are most predictive." 
-            };
+            breakdown.paymentHistory = { title: "Component 1: Payment History (40% Weight)", explanation: "This is the most critical factor. It reflects your reliability in meeting past obligations.", formula: "Weighted average of on-time payments.", calculation: `(${inputs.creditCardPayments}*0.30) + (${inputs.loanPayments}*0.25) + (${inputs.rentPayments}*0.20) + (${inputs.utilityPayments}*0.15) + (${inputs.governmentPayments}*0.10)`, result: `Score: ${formatNumber(paymentHistoryScore)} / 100`, rationale: "Weights are aligned with industry models like FICO, where timely payments on traditional credit (cards, loans) are most predictive." };
 
-            // --- Component 2: Financial Health ---
             const debtToIncomeRatio = pppAdjustedIncome > 0 ? (totalDebt / pppAdjustedIncome) * 100 : Infinity;
             const dtiScore = Math.max(0, 100 - (debtToIncomeRatio * 1.2));
             const leverageRatio = totalAssets > 0 ? (totalDebt / totalAssets) * 100 : 0;
@@ -383,59 +551,26 @@
             const liquidityRatio = pppAdjustedIncome > 0 ? inputs.bankSavings / (pppAdjustedIncome / 12) : 0;
             const liquidityScore = Math.min(100, liquidityRatio * 15);
             const financialHealthScore = (dtiScore * 0.40) + (leverageScore * 0.35) + (liquidityScore * 0.25);
-            breakdown.financialHealth = { 
-                title: "Component 2: Financial Health (30% Weight)", 
-                explanation: "Measures your current financial stability and capacity to handle debt.",
-                formula: "(DTI Score × 0.40) + (Leverage Score × 0.35) + (Liquidity Score × 0.25)",
-                calculation: `(${formatNumber(dtiScore)}*0.40) + (${formatNumber(leverageScore)}*0.35) + (${formatNumber(liquidityScore)}*0.25)`,
-                result: `Score: ${formatNumber(financialHealthScore)} / 100`,
-                subSteps: [
-                    { title: "DTI Score", explanation: "The * 1.2 is a sensitivity factor to penalize high DTI more heavily.", formula: "max(0, 100 - (DTI_Ratio * 1.2))", calculation: `max(0, 100 - (${formatNumber(debtToIncomeRatio)} * 1.2))`, result: formatNumber(dtiScore) },
-                    { title: "Leverage Score", formula: "max(0, 100 - Leverage_Ratio)", calculation: `max(0, 100 - ${formatNumber(leverageRatio)})`, result: formatNumber(leverageScore) },
-                    { title: "Liquidity Score", explanation: "The * 15 is a scaling factor to convert 'months of savings' to a score out of 100.", formula: "min(100, Months_of_Savings * 15)", calculation: `min(100, ${formatNumber(liquidityRatio)} * 15)`, result: formatNumber(liquidityScore) }
-                ],
-                rationale: "This category mirrors FICO's 'Amounts Owed'. DTI is the most critical indicator of cash flow strain. Leverage shows overall reliance on debt."
-            };
+            breakdown.financialHealth = { title: "Component 2: Financial Health (30% Weight)", explanation: "Measures your current financial stability and capacity to handle debt.", formula: "(DTI Score × 0.40) + (Leverage Score × 0.35) + (Liquidity Score × 0.25)", calculation: `(${formatNumber(dtiScore)}*0.40) + (${formatNumber(leverageScore)}*0.35) + (${formatNumber(liquidityScore)}*0.25)`, result: `Score: ${formatNumber(financialHealthScore)} / 100`, subSteps: [ { title: "DTI Score", explanation: "The * 1.2 is a sensitivity factor to penalize high DTI more heavily.", formula: "max(0, 100 - (DTI_Ratio * 1.2))", calculation: `max(0, 100 - (${formatNumber(debtToIncomeRatio)} * 1.2))`, result: formatNumber(dtiScore) }, { title: "Leverage Score", formula: "max(0, 100 - Leverage_Ratio)", calculation: `max(0, 100 - ${formatNumber(leverageRatio)})`, result: formatNumber(leverageScore) }, { title: "Liquidity Score", explanation: "The * 15 is a scaling factor to convert 'months of savings' to a score out of 100.", formula: "min(100, Months_of_Savings * 15)", calculation: `min(100, ${formatNumber(liquidityRatio)} * 15)`, result: formatNumber(liquidityScore) } ], rationale: "This category mirrors FICO's 'Amounts Owed'. DTI is the most critical indicator of cash flow strain. Leverage shows overall reliance on debt." };
 
-            // --- Component 3: Behavioral & Stability ---
             const emergencyMonths = pppAdjustedIncome > 0 ? inputs.bankSavings / (pppAdjustedIncome / 12) : 0;
             const emergencyFundScore = (100 - (Math.max(0, 5 - emergencyMonths) * 20));
             const cashFlowStabilityScore = inputs.avgMonthlyIncome > 0 ? Math.min(100, (inputs.avgMonthEndBalance / inputs.avgMonthlyIncome) * 150) : 0;
             const budgetingScore = inputs.budgetingTool * 25;
             const goalsScore = Object.values(inputs.financialGoals).filter(Boolean).length * 20;
             const behavioralScore = (emergencyFundScore * 0.30) + (cashFlowStabilityScore * 0.30) + (budgetingScore * 0.20) + (goalsScore * 0.20);
-            
             const residencyRiskPenalties = [0, 5, 15, 20];
             const residencyRisk = residencyRiskPenalties[inputs.residencyStatus];
             const residencyScore = 100 - residencyRisk;
             const employmentScore = Math.min(100, (inputs.employmentTenure / 60) * 100);
             const demographicScore = (residencyScore * 0.50) + (employmentScore * 0.50);
-            
             const combinedBehavioralScore = (behavioralScore * 0.5) + (demographicScore * 0.5);
-            breakdown.behavioral = { 
-                title: "Component 3: Behavioral & Stability (30% Weight)", 
-                explanation: "A proxy for financial habits and life stability.",
-                formula: "(Behavioral Score × 0.5) + (Stability Score × 0.5)",
-                calculation: `(${formatNumber(behavioralScore)}*0.5) + (${formatNumber(demographicScore)}*0.5)`,
-                result: `Score: ${formatNumber(combinedBehavioralScore)} / 100`,
-                subSteps: [
-                    { title: "Behavioral Habits Score", formula: "Weighted Avg(Emergency Fund, Cash Flow, Budgeting, Goals)", calculation: `(${formatNumber(emergencyFundScore)}*0.3) + (${formatNumber(cashFlowStabilityScore)}*0.3) + (${budgetingScore}*0.2) + (${goalsScore}*0.2)`, result: formatNumber(behavioralScore) },
-                    { title: "Demographic Stability Score", formula: "(Residency Score * 0.5) + (Employment Score * 0.5)", calculation: `(${formatNumber(residencyScore)}*0.5) + (${formatNumber(employmentScore)}*0.5)`, result: formatNumber(demographicScore) }
-                ],
-                rationale: "Proactive financial habits and life stability are strong indicators of future reliability."
-            };
+            breakdown.behavioral = { title: "Component 3: Behavioral & Stability (30% Weight)", explanation: "A proxy for financial habits and life stability.", formula: "(Behavioral Score × 0.5) + (Stability Score × 0.5)", calculation: `(${formatNumber(behavioralScore)}*0.5) + (${formatNumber(demographicScore)}*0.5)`, result: `Score: ${formatNumber(combinedBehavioralScore)} / 100`, subSteps: [ { title: "Behavioral Habits Score", formula: "Weighted Avg(Emergency Fund, Cash Flow, Budgeting, Goals)", calculation: `(${formatNumber(emergencyFundScore)}*0.3) + (${formatNumber(cashFlowStabilityScore)}*0.3) + (${budgetingScore}*0.2) + (${goalsScore}*0.2)`, result: formatNumber(behavioralScore) }, { title: "Demographic Stability Score", formula: "(Residency Score * 0.5) + (Employment Score * 0.5)", calculation: `(${formatNumber(residencyScore)}*0.5) + (${formatNumber(employmentScore)}*0.5)`, result: formatNumber(demographicScore) } ], rationale: "Proactive financial habits and life stability are strong indicators of future reliability." };
             
-            // --- Final Score ---
             const baseRiskScore = (paymentHistoryScore * 0.40) + (financialHealthScore * 0.30) + (combinedBehavioralScore * 0.30);
             const countryRiskMultiplier = 1 + (config.country_risk / 100);
             const countryAdjustedScore = baseRiskScore / countryRiskMultiplier;
-            breakdown.finalScore = { 
-                title: "Final Score Calculation", 
-                explanation: "The three main component scores are combined and then adjusted for country-specific risk.", 
-                formula: "((Payment * 0.4) + (Health * 0.3) + (Behavioral * 0.3)) / Country_Risk",
-                calculation: `((${formatNumber(paymentHistoryScore)}*0.4) + (${formatNumber(financialHealthScore)}*0.3) + (${formatNumber(combinedBehavioralScore)}*0.3)) / ${countryRiskMultiplier}`,
-                result: `Final Score: ${formatNumber(countryAdjustedScore)} / 100`
-            };
+            breakdown.finalScore = { title: "Final Score Calculation", explanation: "The three main component scores are combined and then adjusted for country-specific risk.", formula: "((Payment * 0.4) + (Health * 0.3) + (Behavioral * 0.3)) / Country_Risk", calculation: `((${formatNumber(paymentHistoryScore)}*0.4) + (${formatNumber(financialHealthScore)}*0.3) + (${formatNumber(combinedBehavioralScore)}*0.3)) / ${countryRiskMultiplier}`, result: `Final Score: ${formatNumber(countryAdjustedScore)} / 100` };
 
             const probabilityOfDefault = Math.max(0.1, 50 - (countryAdjustedScore * 0.5)) / 100;
             const lossGivenDefault = 0.45 + ((100-behavioralScore) / 1000);
@@ -468,7 +603,11 @@
             if (emergencyMonths < 3) recommendations.push(`Build emergency fund to ${emergencyFundTarget3Months} - ${emergencyFundTarget6Months}`);
             if (inputs.budgetingTool < 2) recommendations.push("Adopt digital budgeting tools");
             if (paymentHistoryScore < 95) recommendations.push("Set up automatic bill payments");
-            setResults({ overallRiskScore: Math.round(countryAdjustedScore), riskCategory, riskGrade, recommendedLimit, expectedLoss, defaultProbability: formatNumber(probabilityOfDefault * 100), recommendations, warningFlags, debtToIncomeRatio: formatNumber(debtToIncomeRatio), leverageRatio: formatNumber(leverageRatio) });
+            
+            const finalScore = Math.round(countryAdjustedScore);
+            setResults({ overallRiskScore: finalScore, riskCategory, riskGrade, recommendedLimit, expectedLoss, defaultProbability: formatNumber(probabilityOfDefault * 100), recommendations, warningFlags, debtToIncomeRatio: formatNumber(debtToIncomeRatio), leverageRatio: formatNumber(leverageRatio) });
+            
+            runStressTest(finalScore, inputs.industry, currency);
           };
           
           const handleCalculateRisk = () => { calculateAdvancedRisk(); setHasCalculated(true); setActiveTab('results'); };
@@ -511,33 +650,58 @@
           
           const inputTabs = ['financial', 'payment history', 'lifestyle', 'behavioral', 'demographics'];
           const resultTabs = ['results', 'model logic'];
-          const displayedTabs = hasCalculated ? [...resultTabs, ...inputTabs] : inputTabs;
+          const allTabs = ['about', ...inputTabs, ...resultTabs];
+          const displayedTabs = hasCalculated ? allTabs : ['about', ...inputTabs];
 
           return (
             <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 bg-gray-50 min-h-screen">
               <div className="text-center mb-8">
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2"><a href="https://arnavray.ca" target="_blank" className="hover:text-blue-600 transition-colors">OpenCredit Platform</a></h1>
                 <p className="text-gray-600 mb-4 max-w-2xl mx-auto">An open-source, research-based credit risk model with full transparency.</p>
+                
                 <div className="flex justify-center items-center gap-4 mb-6">
-                    <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        {Object.entries(currencyConfig).map(([code, config]) => (<option key={code} value={code}>{config.symbol} {config.name} ({config.country})</option>))}
-                    </select>
+                    <div>
+                        <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {Object.entries(currencyConfig).map(([code, config]) => (<option key={code} value={code}>{config.symbol} {config.name} ({config.country})</option>))}
+                        </select>
+                    </div>
                 </div>
                 <PerspectiveToggle perspective={perspective} setPerspective={setPerspective} />
               </div>
 
               <div className="flex justify-center mb-6"><div className="flex flex-wrap justify-center space-x-1 bg-white p-1 rounded-lg border shadow-sm">{displayedTabs.map((tab) => {
                   const isResultTab = resultTabs.includes(tab);
-                  const activeClass = isResultTab ? 'bg-green-600 text-white shadow' : 'bg-blue-600 text-white shadow';
+                  const isInputTab = inputTabs.includes(tab);
+                  let activeClass = 'bg-gray-600 text-white shadow';
+                  if (isResultTab) activeClass = 'bg-green-600 text-white shadow';
+                  if (isInputTab) activeClass = 'bg-blue-600 text-white shadow';
+                  if (tab === 'about') activeClass = 'bg-gray-800 text-white shadow';
+
                   const inactiveClass = 'text-gray-600 hover:bg-gray-100';
                   return (<button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 text-sm sm:px-6 sm:py-2 rounded-md font-medium capitalize transition-colors duration-200 ${activeTab === tab ? activeClass : inactiveClass}`}>{tab}</button>);
               })}</div></div>
               
-              {activeTab === 'financial' && (<div className="space-y-6"><Card><CardHeader><h4 className="font-semibold text-gray-800">Purpose of This Section</h4></CardHeader><CardContent><p className="text-sm text-gray-700">This section assesses your core financial capacity. It looks at your income (ability to earn) and your assets vs. debts (your net worth and stability). This is the foundation of your ability to handle credit.</p></CardContent></Card><div className="grid grid-cols-1 lg:grid-cols-2 gap-6"><Card><CardHeader><div className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-green-600" /><h3 className="text-lg font-semibold text-gray-800">Income & Assets</h3></div></CardHeader><CardContent className="space-y-6"><SliderInput label="Individual Annual Income" value={inputs.individualIncome} onChange={(val) => setInputs({...inputs, individualIncome: val})} min={10000} max={500000} step={1000} icon={User} isCurrency={true} helpText="Higher income demonstrates a stronger ability to repay debt." /><SliderInput label="Family Annual Income" value={inputs.familyIncome} onChange={(val) => setInputs({...inputs, familyIncome: val})} min={10000} max={800000} step={1000} icon={Users} isCurrency={true} helpText="Total household income provides a broader view of financial capacity." /><SliderInput label="Bank Savings" value={inputs.bankSavings} onChange={(val) => setInputs({...inputs, bankSavings: val})} min={0} max={200000} step={500} icon={DollarSign} isCurrency={true} helpText="Liquid savings are crucial for handling emergencies without borrowing." /><SliderInput label="Equity Investments" value={inputs.equityInvestments} onChange={(val) => setInputs({...inputs, equityInvestments: val})} min={0} max={500000} step={1000} icon={TrendingUp} isCurrency={true} helpText="Investments show financial planning but are less liquid than cash." /><SliderInput label="Real Estate Value" value={inputs.realEstate} onChange={(val) => setInputs({...inputs, realEstate: val})} min={0} max={2000000} step={10000} icon={Building} isCurrency={true} helpText="Property is a significant asset but is not liquid." /><SliderInput label="Bullion Assets" value={inputs.bullionAssets} onChange={(val) => setInputs({...inputs, bullionAssets: val})} min={0} max={100000} step={500} icon={PiggyBank} isCurrency={true} helpText="Valued at 90% due to liquidity. A stable, physical asset." /><SliderInput label="Cryptocurrency Assets" value={inputs.cryptoAssets} onChange={(val) => setInputs({...inputs, cryptoAssets: val})} min={0} max={100000} step={500} icon={AlertTriangle} isCurrency={true} helpText="Valued at 50% due to high volatility and risk." /></CardContent></Card><Card><CardHeader><div className="flex items-center gap-2"><CreditCard className="w-5 h-5 text-red-600" /><h3 className="text-lg font-semibold text-gray-800">Debts & Cash Flow</h3></div></CardHeader><CardContent className="space-y-6"><SliderInput label="Secured Debt" value={inputs.securedDebt} onChange={(val) => setInputs({...inputs, securedDebt: val})} min={0} max={800000} step={1000} icon={Shield} isCurrency={true} helpText="Debt backed by an asset, like a mortgage or auto loan." /><SliderInput label="Unsecured Debt" value={inputs.unsecuredDebt} onChange={(val) => setInputs({...inputs, unsecuredDebt: val})} min={0} max={100000} step={500} icon={CreditCard} isCurrency={true} helpText="Debt not backed by an asset, like credit cards or personal loans." /><SliderInput label="Avg. Monthly Income (Post-Tax)" value={inputs.avgMonthlyIncome} onChange={(val) => setInputs({...inputs, avgMonthlyIncome: val})} min={500} max={20000} step={100} icon={DollarSign} isCurrency={true} helpText="Your actual take-home pay, which determines your repayment ability." /><SliderInput label="Avg. Month-End Bank Balance" value={inputs.avgMonthEndBalance} onChange={(val) => setInputs({...inputs, avgMonthEndBalance: val})} min={0} max={50000} step={100} icon={Bank} isCurrency={true} helpText="A higher balance before your next paycheck indicates positive cash flow." /></CardContent></Card></div></div>)}
-              {activeTab === 'payment history' && (<div className="space-y-6 max-w-4xl mx-auto"><Card><CardHeader><h4 className="font-semibold text-gray-800">Purpose of This Section</h4></CardHeader><CardContent><p className="text-sm text-gray-700">This is the most critical part of any credit model. It's a direct record of your reliability and answers the fundamental question for any lender: "Does this person pay their bills on time?"</p></CardContent></Card><Card><CardHeader><div className="flex items-center gap-2"><Shield className="w-5 h-5 text-blue-600" /><h3 className="text-lg font-semibold text-gray-800">Payment History (% On-Time)</h3></div></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><SliderInput label="Credit Cards" value={inputs.creditCardPayments} onChange={(val) => setInputs({...inputs, creditCardPayments: val})} min={0} max={100} icon={CreditCard} unit="%" helpText="Most heavily weighted payment type." /><SliderInput label="Loans" value={inputs.loanPayments} onChange={(val) => setInputs({...inputs, loanPayments: val})} min={0} max={100} icon={DollarSign} unit="%" helpText="Includes personal, auto, and student loans." /><SliderInput label="Rent/Mortgage" value={inputs.rentPayments} onChange={(val) => setInputs({...inputs, rentPayments: val})} min={0} max={100} icon={Building} unit="%" helpText="Consistent housing payments are a strong stability signal." /><SliderInput label="Utility Payments" value={inputs.utilityPayments} onChange={(val) => setInputs({...inputs, utilityPayments: val})} min={0} max={100} icon={Info} unit="%" helpText="Electricity, water, gas, phone bills." /><SliderInput label="Taxes" value={inputs.governmentPayments} onChange={(val) => setInputs({...inputs, governmentPayments: val})} min={0} max={100} icon={Shield} unit="%" helpText="Timely tax payments are a key responsibility." /></CardContent></Card></div>)}
-              {activeTab === 'lifestyle' && (<div className="space-y-6"><Card><CardHeader><h4 className="font-semibold text-gray-800">Purpose of This Section</h4></CardHeader><CardContent><p className="text-sm text-gray-700">The spending information in this section is <strong className="text-blue-600">not</strong> used to judge your creditworthiness or calculate your risk score. It is only used to estimate your monthly expenses, which helps provide a personalized target for your 3-to-6-month emergency fund in the final report.</p></CardContent></Card><div className="grid grid-cols-1 lg:grid-cols-3 gap-6"><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Family & Essentials</h3></CardHeader><CardContent className="space-y-6"><SliderInput label="Monthly Groceries" value={inputs.groceriesSpending} onChange={(val) => setInputs({...inputs, groceriesSpending: val})} min={0} max={2000} step={25} icon={ShoppingCart} isCurrency={true} /><SliderInput label="Kids' Education" value={inputs.kidsEducationSpending} onChange={(val) => setInputs({...inputs, kidsEducationSpending: val})} min={0} max={3000} step={50} icon={GraduationCap} isCurrency={true} /><SliderInput label="Clothing & Apparel" value={inputs.clothingSpending} onChange={(val) => setInputs({...inputs, clothingSpending: val})} min={0} max={1000} step={20} icon={Shirt} isCurrency={true} /><SliderInput label="Kids' Activities" value={inputs.kidsActivitiesSpending} onChange={(val) => setInputs({...inputs, kidsActivitiesSpending: val})} min={0} max={1000} step={20} icon={Activity} isCurrency={true} /></CardContent></Card><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Insurance & Transport</h3></CardHeader><CardContent className="space-y-6"><SliderInput label="Car Maintenance/Petrol" value={inputs.carMaintenance} onChange={(val) => setInputs({...inputs, carMaintenance: val})} min={0} max={1000} step={20} icon={Car} isCurrency={true} /><SliderInput label="Life Insurance" value={inputs.lifeInsurance} onChange={(val) => setInputs({...inputs, lifeInsurance: val})} min={0} max={1000} step={10} icon={Shield} isCurrency={true} /><SliderInput label="Medical Insurance" value={inputs.medicalInsurance} onChange={(val) => setInputs({...inputs, medicalInsurance: val})} min={0} max={2000} step={25} icon={HeartPulse} isCurrency={true} /><SliderInput label="Medical Bills (Out of Pocket)" value={inputs.medicalBills} onChange={(val) => setInputs({...inputs, medicalBills: val})} min={0} max={1000} step={10} icon={HeartPulse} isCurrency={true} /></CardContent></Card><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Discretionary Spending</h3></CardHeader><CardContent className="space-y-6"><SliderInput label="Dining & Delivery" value={inputs.restaurantSpending} onChange={(val) => setInputs({...inputs, restaurantSpending: val})} min={0} max={2000} step={25} icon={DollarSign} isCurrency={true} /><SliderInput label="Subscriptions" value={inputs.subscriptionServices} onChange={(val) => setInputs({...inputs, subscriptionServices: val})} min={0} max={500} step={10} icon={CreditCard} isCurrency={true} /><SliderInput label="Vacation & Travel" value={inputs.vacationSpending} onChange={(val) => setInputs({...inputs, vacationSpending: val})} min={0} max={20000} step={250} icon={Globe} isCurrency={true} /><SliderInput label="'Sin' Spending" value={inputs.sinSpending} onChange={(val) => setInputs({...inputs, sinSpending: val})} min={0} max={1000} step={10} icon={AlertTriangle} isCurrency={true} helpText="Gambling, tobacco, alcohol, etc." /><SliderInput label="Donations" value={inputs.donations} onChange={(val) => setInputs({...inputs, donations: val})} min={0} max={1000} step={10} icon={HeartPulse} isCurrency={true} /><SliderInput label="Other Expenses" value={inputs.otherExpenses} onChange={(val) => setInputs({...inputs, otherExpenses: val})} min={0} max={2000} step={25} icon={Info} isCurrency={true} /></CardContent></Card></div></div>)}
-              {activeTab === 'behavioral' && (<div className="space-y-6 max-w-4xl mx-auto"><Card><CardHeader><h4 className="font-semibold text-gray-800">Purpose of This Section</h4></CardHeader><CardContent><p className="text-sm text-gray-700">This section acts as a proxy for your financial habits and planning. Using budgeting tools and having clear goals are strong behavioral indicators of a responsible and proactive borrower.</p></CardContent></Card><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Financial Habits & Planning</h3></CardHeader><CardContent className="space-y-6"><RadioGroup label="Budgeting Tools Sophistication" options={['No formal budget', 'I use a spreadsheet', 'I use a budgeting app (Mint, YNAB, etc.)', 'I use advanced software (e.g., for business)', 'I work with a financial advisor']} value={inputs.budgetingTool} onChange={(val) => setInputs({...inputs, budgetingTool: val})} icon={Calculator} helpText="Using budgeting tools is a positive behavioral signal that you proactively manage your finances." /><CheckboxGroup label="What are your primary financial goals?" options={{ retirement: 'Saving for retirement', emergencyFund: 'Building an emergency fund', downPayment: 'Saving for a down payment', payOffDebt: 'Paying off debt', travel: 'Saving for travel/large purchase' }} values={inputs.financialGoals} onChange={(key) => setInputs({...inputs, financialGoals: {...inputs.financialGoals, [key]: !inputs.financialGoals[key]}})} icon={Target} helpText="Having clear financial goals is another positive signal of financial planning and stability." /></CardContent></Card></div>)}
-              {activeTab === 'demographics' && (<div className="space-y-6 max-w-4xl mx-auto"><Card><CardHeader><h4 className="font-semibold text-gray-800">Purpose of This Section</h4></CardHeader><CardContent><p className="text-sm text-gray-700">These factors provide context about your stability. Lenders use this information to build a broader picture of your financial responsibilities. Longer employment tenure and a stable residency status suggest a lower risk of sudden income loss.</p></CardContent></Card><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Personal & Employment</h3></CardHeader><CardContent className="space-y-6"><SliderInput label="Age" value={inputs.age} onChange={(val) => setInputs({...inputs, age: val})} min={18} max={80} icon={User} unit=" years" helpText="Age can be a proxy for the length of your credit history and financial experience." /><SliderInput label="Employment Tenure" value={inputs.employmentTenure} onChange={(val) => setInputs({...inputs, employmentTenure: val})} min={0} max={120} icon={User} unit=" months" helpText="Months at current job. Longer tenure indicates income stability." /><SliderInput label="Number of Children" value={inputs.numberOfChildren} onChange={(val) => setInputs({...inputs, numberOfChildren: val})} min={0} max={8} icon={Users} unit=" children" /><RadioGroup label="Marital Status" options={['Single', 'Married/Partner']} value={inputs.marriedStatus} onChange={(val) => setInputs({...inputs, marriedStatus: val})} icon={Users} helpText="These demographic factors help build a broader picture of financial responsibilities and stability." /><RadioGroup label="Education Level" options={['High School', 'Some College', 'Bachelors', 'Masters', 'PhD/Professional']} value={inputs.educationLevel} onChange={(val) => setInputs({...inputs, educationLevel: val})} icon={User} helpText="Often correlates with income stability and financial literacy." /><RadioGroup label="Residency Status" options={['Citizen', 'Permanent Resident', 'Long-Term Work Permit', 'Other/Short-Term Visa']} value={inputs.residencyStatus} onChange={(val) => setInputs({...inputs, residencyStatus: val})} icon={Globe} helpText="Citizenship or permanent residency indicates long-term stability in the country, reducing risk." /></CardContent></Card></div>)}
+              {!hasCalculated && activeTab !== 'about' && <QuickStartGuide />}
+              {activeTab === 'about' && <AboutSection />}
+
+              {activeTab === 'financial' && (<div className="space-y-6"><div className="grid grid-cols-1 lg:grid-cols-2 gap-6"><Card><CardHeader><div className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-green-600" /><h3 className="text-lg font-semibold text-gray-800">Income & Assets</h3></div></CardHeader><CardContent className="space-y-6"><SliderInput label="Individual Annual Income" value={inputs.individualIncome} onChange={(val) => setInputs({...inputs, individualIncome: val})} min={10000} max={500000} step={1000} icon={User} isCurrency={true} helpText="Higher income demonstrates a stronger ability to repay debt." /><SliderInput label="Family Annual Income" value={inputs.familyIncome} onChange={(val) => setInputs({...inputs, familyIncome: val})} min={10000} max={800000} step={1000} icon={Users} isCurrency={true} helpText="Total household income provides a broader view of financial capacity." /><SliderInput label="Bank Savings" value={inputs.bankSavings} onChange={(val) => setInputs({...inputs, bankSavings: val})} min={0} max={200000} step={500} icon={DollarSign} isCurrency={true} helpText="Liquid savings are crucial for handling emergencies without borrowing." /><SliderInput label="Equity Investments" value={inputs.equityInvestments} onChange={(val) => setInputs({...inputs, equityInvestments: val})} min={0} max={500000} step={1000} icon={TrendingUp} isCurrency={true} helpText="Investments show financial planning but are less liquid than cash." /><SliderInput label="Real Estate Value" value={inputs.realEstate} onChange={(val) => setInputs({...inputs, realEstate: val})} min={0} max={2000000} step={10000} icon={Building} isCurrency={true} helpText="Property is a significant asset but is not liquid." /><SliderInput label="Bullion Assets" value={inputs.bullionAssets} onChange={(val) => setInputs({...inputs, bullionAssets: val})} min={0} max={100000} step={500} icon={PiggyBank} isCurrency={true} helpText="Valued at 90% due to liquidity. A stable, physical asset." /><SliderInput label="Cryptocurrency Assets" value={inputs.cryptoAssets} onChange={(val) => setInputs({...inputs, cryptoAssets: val})} min={0} max={100000} step={500} icon={AlertTriangle} isCurrency={true} helpText="Valued at 50% due to high volatility and risk." /></CardContent></Card><Card><CardHeader><div className="flex items-center gap-2"><CreditCard className="w-5 h-5 text-red-600" /><h3 className="text-lg font-semibold text-gray-800">Debts & Cash Flow</h3></div></CardHeader><CardContent className="space-y-6"><SliderInput label="Secured Debt" value={inputs.securedDebt} onChange={(val) => setInputs({...inputs, securedDebt: val})} min={0} max={800000} step={1000} icon={Shield} isCurrency={true} helpText="Debt backed by an asset, like a mortgage or auto loan." /><SliderInput label="Unsecured Debt" value={inputs.unsecuredDebt} onChange={(val) => setInputs({...inputs, unsecuredDebt: val})} min={0} max={100000} step={500} icon={CreditCard} isCurrency={true} helpText="Debt not backed by an asset, like credit cards or personal loans." /><SliderInput label="Avg. Monthly Income (Post-Tax)" value={inputs.avgMonthlyIncome} onChange={(val) => setInputs({...inputs, avgMonthlyIncome: val})} min={500} max={20000} step={100} icon={DollarSign} isCurrency={true} helpText="Your actual take-home pay, which determines your repayment ability." /><SliderInput label="Avg. Month-End Bank Balance" value={inputs.avgMonthEndBalance} onChange={(val) => setInputs({...inputs, avgMonthEndBalance: val})} min={0} max={50000} step={100} icon={Bank} isCurrency={true} helpText="A higher balance before your next paycheck indicates positive cash flow." /></CardContent></Card></div></div>)}
+              {activeTab === 'payment history' && (<div className="space-y-6 max-w-4xl mx-auto"><Card><CardHeader><div className="flex items-center gap-2"><Shield className="w-5 h-5 text-blue-600" /><h3 className="text-lg font-semibold text-gray-800">Payment History (% On-Time)</h3></div></CardHeader><CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><SliderInput label="Credit Cards" value={inputs.creditCardPayments} onChange={(val) => setInputs({...inputs, creditCardPayments: val})} min={0} max={100} icon={CreditCard} unit="%" helpText="Most heavily weighted payment type." /><SliderInput label="Loans" value={inputs.loanPayments} onChange={(val) => setInputs({...inputs, loanPayments: val})} min={0} max={100} icon={DollarSign} unit="%" helpText="Includes personal, auto, and student loans." /><SliderInput label="Rent/Mortgage" value={inputs.rentPayments} onChange={(val) => setInputs({...inputs, rentPayments: val})} min={0} max={100} icon={Building} unit="%" helpText="Consistent housing payments are a strong stability signal." /><SliderInput label="Utility Payments" value={inputs.utilityPayments} onChange={(val) => setInputs({...inputs, utilityPayments: val})} min={0} max={100} icon={Info} unit="%" helpText="Electricity, water, gas, phone bills." /><SliderInput label="Taxes" value={inputs.governmentPayments} onChange={(val) => setInputs({...inputs, governmentPayments: val})} min={0} max={100} icon={Shield} unit="%" helpText="Timely tax payments are a key responsibility." /></CardContent></Card></div>)}
+              {activeTab === 'lifestyle' && (<div className="space-y-6"><div className="grid grid-cols-1 lg:grid-cols-3 gap-6"><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Family & Essentials</h3></CardHeader><CardContent className="space-y-6"><SliderInput label="Monthly Groceries" value={inputs.groceriesSpending} onChange={(val) => setInputs({...inputs, groceriesSpending: val})} min={0} max={2000} step={25} icon={ShoppingCart} isCurrency={true} /><SliderInput label="Kids' Education" value={inputs.kidsEducationSpending} onChange={(val) => setInputs({...inputs, kidsEducationSpending: val})} min={0} max={3000} step={50} icon={GraduationCap} isCurrency={true} /><SliderInput label="Clothing & Apparel" value={inputs.clothingSpending} onChange={(val) => setInputs({...inputs, clothingSpending: val})} min={0} max={1000} step={20} icon={Shirt} isCurrency={true} /><SliderInput label="Kids' Activities" value={inputs.kidsActivitiesSpending} onChange={(val) => setInputs({...inputs, kidsActivitiesSpending: val})} min={0} max={1000} step={20} icon={Activity} isCurrency={true} /></CardContent></Card><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Insurance & Transport</h3></CardHeader><CardContent className="space-y-6"><SliderInput label="Car Maintenance/Petrol" value={inputs.carMaintenance} onChange={(val) => setInputs({...inputs, carMaintenance: val})} min={0} max={1000} step={20} icon={Car} isCurrency={true} /><SliderInput label="Life Insurance" value={inputs.lifeInsurance} onChange={(val) => setInputs({...inputs, lifeInsurance: val})} min={0} max={1000} step={10} icon={Shield} isCurrency={true} /><SliderInput label="Medical Insurance" value={inputs.medicalInsurance} onChange={(val) => setInputs({...inputs, medicalInsurance: val})} min={0} max={2000} step={25} icon={HeartPulse} isCurrency={true} /><SliderInput label="Medical Bills (Out of Pocket)" value={inputs.medicalBills} onChange={(val) => setInputs({...inputs, medicalBills: val})} min={0} max={1000} step={10} icon={HeartPulse} isCurrency={true} /></CardContent></Card><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Discretionary Spending</h3></CardHeader><CardContent className="space-y-6"><SliderInput label="Dining & Delivery" value={inputs.restaurantSpending} onChange={(val) => setInputs({...inputs, restaurantSpending: val})} min={0} max={2000} step={25} icon={DollarSign} isCurrency={true} /><SliderInput label="Subscriptions" value={inputs.subscriptionServices} onChange={(val) => setInputs({...inputs, subscriptionServices: val})} min={0} max={500} step={10} icon={CreditCard} isCurrency={true} /><SliderInput label="Vacation & Travel" value={inputs.vacationSpending} onChange={(val) => setInputs({...inputs, vacationSpending: val})} min={0} max={20000} step={250} icon={Globe} isCurrency={true} /><SliderInput label="'Sin' Spending" value={inputs.sinSpending} onChange={(val) => setInputs({...inputs, sinSpending: val})} min={0} max={1000} step={10} icon={AlertTriangle} isCurrency={true} helpText="Gambling, tobacco, alcohol, etc." /><SliderInput label="Donations" value={inputs.donations} onChange={(val) => setInputs({...inputs, donations: val})} min={0} max={1000} step={10} icon={HeartPulse} isCurrency={true} /><SliderInput label="Other Expenses" value={inputs.otherExpenses} onChange={(val) => setInputs({...inputs, otherExpenses: val})} min={0} max={2000} step={25} icon={Info} isCurrency={true} /></CardContent></Card></div></div>)}
+              {activeTab === 'behavioral' && (<div className="space-y-6 max-w-4xl mx-auto"><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Financial Habits & Planning</h3></CardHeader><CardContent className="space-y-6"><RadioGroup label="Budgeting Tools Sophistication" options={['No formal budget', 'I use a spreadsheet', 'I use a budgeting app (Mint, YNAB, etc.)', 'I use advanced software (e.g., for business)', 'I work with a financial advisor']} value={inputs.budgetingTool} onChange={(val) => setInputs({...inputs, budgetingTool: val})} icon={Calculator} helpText="Using budgeting tools is a positive behavioral signal that you proactively manage your finances." /><CheckboxGroup label="What are your primary financial goals?" options={{ retirement: 'Saving for retirement', emergencyFund: 'Building an emergency fund', downPayment: 'Saving for a down payment', payOffDebt: 'Paying off debt', travel: 'Saving for travel/large purchase' }} values={inputs.financialGoals} onChange={(key) => setInputs({...inputs, financialGoals: {...inputs.financialGoals, [key]: !inputs.financialGoals[key]}})} icon={Target} helpText="Having clear financial goals is another positive signal of financial planning and stability." /></CardContent></Card></div>)}
+              {activeTab === 'demographics' && (<div className="space-y-6 max-w-4xl mx-auto"><Card><CardHeader><h3 className="text-lg font-semibold text-gray-800">Personal & Employment</h3></CardHeader><CardContent className="space-y-6"><SliderInput label="Age" value={inputs.age} onChange={(val) => setInputs({...inputs, age: val})} min={18} max={80} icon={User} unit=" years" helpText="Age can be a proxy for the length of your credit history and financial experience." /><SliderInput label="Employment Tenure" value={inputs.employmentTenure} onChange={(val) => setInputs({...inputs, employmentTenure: val})} min={0} max={120} icon={User} unit=" months" helpText="Months at current job. Longer tenure indicates income stability." /><SliderInput label="Number of Children" value={inputs.numberOfChildren} onChange={(val) => setInputs({...inputs, numberOfChildren: val})} min={0} max={8} icon={Users} unit=" children" /><RadioGroup label="Marital Status" options={['Single', 'Married/Partner']} value={inputs.marriedStatus} onChange={(val) => setInputs({...inputs, marriedStatus: val})} icon={Users} helpText="These demographic factors help build a broader picture of financial responsibilities and stability." /><RadioGroup label="Education Level" options={['High School', 'Some College', 'Bachelors', 'Masters', 'PhD/Professional']} value={inputs.educationLevel} onChange={(val) => setInputs({...inputs, educationLevel: val})} icon={User} helpText="Often correlates with income stability and financial literacy." /><RadioGroup label="Residency Status" options={['Citizen', 'Permanent Resident', 'Long-Term Work Permit', 'Other/Short-Term Visa']} value={inputs.residencyStatus} onChange={(val) => setInputs({...inputs, residencyStatus: val})} icon={Globe} helpText="Citizenship or permanent residency indicates long-term stability in the country, reducing risk." />
+              
+              <RadioGroup 
+                  label="Industry of Employment" 
+                  options={[
+                      'Technology', 'Healthcare', 'Finance', 
+                      'Manufacturing', 'Retail/Hospitality', 'Consulting', 'Other'
+                  ]} 
+                  value={inputs.industry} 
+                  onChange={(val) => setInputs({...inputs, industry: val})} 
+                  icon={Briefcase} 
+                  helpText="Your industry helps assess sector-specific economic risks for stress testing." 
+              />
+              </CardContent></Card></div>)}
 
               {inputTabs.includes(activeTab) && (<div className="flex justify-center my-8"><button onClick={handleCalculateRisk} className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg flex items-center gap-2"><Calculator className="w-5 h-5" />Calculate Risk Assessment</button></div>)}
 
@@ -558,33 +722,35 @@
                     {perspective === 'lender' && (
                         <div className="space-y-6">
                              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                <Card className="lg:col-span-1"><CardHeader><h3 className="text-lg font-semibold text-gray-800">Risk Assessment Summary</h3></CardHeader><CardContent className="space-y-4"><div className="text-center p-6 bg-gray-100 rounded-lg"><div className="text-5xl font-bold mb-2 text-gray-800">{results.overallRiskScore}</div><div className={`text-lg font-semibold mb-1 ${results.overallRiskScore >= 75 ? 'text-green-600' : results.overallRiskScore >= 55 ? 'text-yellow-600' : 'text-red-600'}`}>{results.riskCategory}</div><div className="text-sm text-gray-600">Grade: {results.riskGrade}</div><div className="text-xs text-gray-500 mt-2">{currencyConfig[currency].score_equiv_label}: <strong className="text-gray-700">{currencyConfig[currency].get_score(results.overallRiskScore)}</strong></div></div>
-                                    <div className="space-y-3 pt-2">
-                                        <div><h4 className="font-semibold text-sm text-gray-600">Recommended Unsecured Credit Limit:</h4><div className="text-2xl font-bold text-blue-600">{formatCurrency(results.recommendedLimit)}</div></div>
-                                        <div><h4 className="font-semibold text-sm text-gray-600">Expected Loss:</h4><div className="text-lg font-bold text-red-600">{formatCurrency(results.expectedLoss)}</div></div>
-                                    </div>
-                                </CardContent></Card>
-                                <Card className="lg:col-span-2"><CardHeader><h3 className="text-lg font-semibold text-gray-800">Key Risk Metrics</h3></CardHeader><CardContent>
-                                    {calculationBreakdown && <AdvancedMetricsStep data={calculationBreakdown.advancedMetrics} />}
-                                </CardContent></Card>
-                            </div>
-                            <Card>
-                                <CardHeader><h3 className="text-lg font-semibold text-gray-800">Applicant Financial Ratios</h3></CardHeader>
-                                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                        <div className="text-sm text-gray-500">Debt-to-Income Ratio</div>
-                                        <div className={`text-2xl font-bold ${results.debtToIncomeRatio > 40 ? 'text-red-600' : 'text-green-600'}`}>{results.debtToIncomeRatio}%</div>
-                                    </div>
-                                    <div className="p-4 bg-gray-50 rounded-lg">
-                                        <div className="text-sm text-gray-500">Leverage Ratio</div>
-                                        <div className={`text-2xl font-bold ${results.leverageRatio > 50 ? 'text-yellow-600' : 'text-green-600'}`}>{results.leverageRatio}%</div>
-                                    </div>
+                                 <Card className="lg:col-span-1 border-indigo-200"><CardHeader className="bg-indigo-50 border-indigo-200"><h3 className="text-lg font-semibold text-indigo-800">Risk Assessment Summary</h3></CardHeader><CardContent className="space-y-4"><div className="text-center p-6 bg-gray-100 rounded-lg"><div className="text-5xl font-bold mb-2 text-gray-800">{results.overallRiskScore}</div><div className={`text-lg font-semibold mb-1 ${results.overallRiskScore >= 75 ? 'text-green-600' : results.overallRiskScore >= 55 ? 'text-yellow-600' : 'text-red-600'}`}>{results.riskCategory}</div><div className="text-sm text-gray-600">Grade: {results.riskGrade}</div><div className="text-xs text-gray-500 mt-2">{currencyConfig[currency].score_equiv_label}: <strong className="text-gray-700">{currencyConfig[currency].get_score(results.overallRiskScore)}</strong></div></div>
+                                     <div className="space-y-3 pt-2">
+                                         <div><h4 className="font-semibold text-sm text-gray-600">Recommended Unsecured Credit Limit:</h4><div className="text-2xl font-bold text-indigo-600">{formatCurrency(results.recommendedLimit)}</div></div>
+                                         <div><h4 className="font-semibold text-sm text-gray-600">Expected Loss:</h4><div className="text-lg font-bold text-red-600">{formatCurrency(results.expectedLoss)}</div></div>
+                                     </div>
+                                 </CardContent></Card>
+                                 <Card className="lg:col-span-2 border-indigo-200"><CardHeader className="bg-indigo-50 border-indigo-200"><h3 className="text-lg font-semibold text-indigo-800">Key Risk Metrics</h3></CardHeader><CardContent>
+                                     {calculationBreakdown && <AdvancedMetricsStep data={calculationBreakdown.advancedMetrics} />}
+                                 </CardContent></Card>
+                             </div>
+                             <StressTestResults baseScore={results.overallRiskScore} stressResults={stressResults} />
+                             <StressTestLogic countryRisk={countryRiskScenarios} industryRisk={industryRiskScenarios} />
+                             <Card>
+                                 <CardHeader><h3 className="text-lg font-semibold text-gray-800">Applicant Financial Ratios</h3></CardHeader>
+                                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                                      <div className="p-4 bg-gray-50 rounded-lg">
-                                        <div className="text-sm text-gray-500">Warning Flags</div>
-                                        <div className="text-lg font-bold text-red-600">{results.warningFlags.length > 0 ? results.warningFlags.join(', ') : 'None'}</div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                         <div className="text-sm text-gray-500">Debt-to-Income Ratio</div>
+                                         <div className={`text-2xl font-bold ${results.debtToIncomeRatio > 40 ? 'text-red-600' : 'text-green-600'}`}>{results.debtToIncomeRatio}%</div>
+                                     </div>
+                                     <div className="p-4 bg-gray-50 rounded-lg">
+                                         <div className="text-sm text-gray-500">Leverage Ratio</div>
+                                         <div className={`text-2xl font-bold ${results.leverageRatio > 50 ? 'text-yellow-600' : 'text-green-600'}`}>{results.leverageRatio}%</div>
+                                     </div>
+                                      <div className="p-4 bg-gray-50 rounded-lg">
+                                         <div className="text-sm text-gray-500">Warning Flags</div>
+                                         <div className="text-lg font-bold text-red-600">{results.warningFlags.length > 0 ? results.warningFlags.join(', ') : 'None'}</div>
+                                     </div>
+                                 </CardContent>
+                             </Card>
                         </div>
                     )}
                 </div>
@@ -606,7 +772,7 @@
                 </p>
               </div>
               <footer className="text-center mt-8 text-sm text-gray-500">
-                <p>Copyright 2025 <a href="https://arnavray.ca" target="_blank" className="text-blue-600 hover:underline">Arnav Amal Ray</a></p>
+                <p>Copyright 2025 <a href="https://arnavray.ca" target="_blank" className="text-blue-600 hover:underline">Arnav Amal Ray</a> | <a href="mailto:arnav@arnavray.ca" className="text-blue-600 hover:underline">arnav@arnavray.ca</a></p>
               </footer>
             </div>
           );
