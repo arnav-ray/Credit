@@ -13,14 +13,21 @@ Alternative Data Integration: Incorporates modern data points like utility payme
 
 Country Risk Adjustments: PPP-adjusted calculations with country-specific risk factors for the USA, Germany, and India.
 
-Interactive & Transparent Interface
-Dynamic Peer Comparison: A bell curve chart that simulates your score against a typical population distribution for your selected country.
+Dual-Perspective Interface
+Borrower View: See your estimated score, understand what it means, and get a personalized report on how to improve it.
 
-Complete Transparency: An expandable section detailing every step of the calculation, including formulas, values, and the rationale behind the weights.
+Lender View: See the financial metrics a lender would focus on, including risk-adjusted limits and Basel III-aligned metrics like Probability of Default (PD) and Expected Loss (EL).
+
+Advanced Modeling & Transparency
+Economic Stress Testing: Simulates the impact of a combined macroeconomic (country-specific) and sector-specific (industry) downturn on your score.
+
+Interactive Peer Comparison: A bell curve chart that simulates your score against a typical population distribution for your selected country.
+
+Complete Transparency: An "About" section explaining the platform's purpose and a "Model Logic" tab detailing every step of the calculation, including formulas, values, and the rationale behind the weights.
 
 Personalized Improvement Plan: Generates a custom report with specific, actionable steps to improve your score.
 
-Self-Contained: Runs as a single HTML file in any modern web browser with no installation required.
+Self-Contained: Runs as a single index.html file in any modern web browser with no installation required.
 
 🛠️ Technology Stack
 Core Logic: JavaScript (ES6+)
@@ -35,23 +42,18 @@ Visualizations: Inline SVG components
 The model is designed to mimic the principles of established scoring systems like FICO.
 
 Core Risk Components
-Payment History (40% weight)
+Payment History (40% weight): The single most important factor. It evaluates your track record of paying bills on time across various credit and non-credit accounts.
 
-The single most important factor. It evaluates your track record of paying bills on time across various credit and non-credit accounts.
+Financial Health (30% weight): Analogous to FICO's "Amounts Owed." This component assesses your overall financial stability and capacity. Key metrics include Debt-to-Income (DTI) ratio, asset leverage, and liquid savings.
 
-Financial Health (30% weight)
+Behavioral & Stability Factors (30% weight): A proxy for FICO's "Length of Credit History," "New Credit," and "Credit Mix." This includes proactive financial management (budgeting, goals) and demographic stability (employment tenure).
 
-Analogous to FICO's "Amounts Owed." This component assesses your overall financial stability and capacity.
+Economic Stress Testing
+The stress test provides a forward-looking risk perspective. It combines two factors to calculate a stressFactor, which is then used to derive a "Stressed Score":
 
-Key metrics include Debt-to-Income (DTI) ratio, asset leverage, and liquid savings.
+Macroeconomic Country Risk: A simulated risk factor based on the selected country (e.g., market shock in the USA, energy crisis in Germany).
 
-Behavioral & Stability Factors (30% weight)
-
-A proxy for FICO's "Length of Credit History," "New Credit," and "Credit Mix."
-
-Behavioral Habits: Proactive financial management, such as having an emergency fund, using budgeting tools, and setting financial goals.
-
-Demographic Stability: Factors like employment tenure and residency status that indicate stability.
+Sector-Specific Industry Risk: A simulated risk factor based on the user's industry of employment (e.g., higher risk for Technology and Retail, lower risk for Healthcare).
 
 Peer Comparison Simulation
 The bell curve chart is a realistic simulation, not a live comparison. Its shape is based on publicly available statistical data for each country to provide meaningful context.
