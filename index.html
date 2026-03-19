@@ -4,16 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenCredit Platform</title>
+    <!-- Content Security Policy: restricts external script sources to known CDNs only.
+         'unsafe-eval' is required by Babel Standalone for in-browser JSX compilation.
+         'unsafe-inline' is required by Tailwind CDN's style injection.
+         Remove both directives if you switch to a pre-compiled build (recommended for production). -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com;
+        style-src 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com;
+        font-src https://fonts.gstatic.com;
+        img-src 'self' data:;
+        connect-src 'none';
+        object-src 'none';
+        base-uri 'self';
+    ">
     
-    <!-- This script adds the styling (Tailwind CSS) -->
+    <!-- Tailwind CSS (CDN). Note: SRI is not supported on the Tailwind Play CDN because
+         the stylesheet is generated dynamically. For production, use the Tailwind CLI build. -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- These scripts add React, which makes the page interactive -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- This script allows the browser to understand the special code format (JSX) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- React 18.3.1 production builds (minified, no dev warnings).
+         Versions are pinned to prevent auto-update supply-chain risk.
+         SRI hashes: generate with `openssl dgst -sha384 -binary <file> | openssl base64 -A`
+         after downloading the pinned files and verify before adding integrity= attributes. -->
+    <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+
+    <!-- Babel Standalone 7.26.4 — allows JSX to run directly in the browser.
+         For production deployments, pre-compile JSX with the Babel CLI or Vite
+         to eliminate this runtime transpilation overhead and attack surface. -->
+    <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js" crossorigin="anonymous"></script>
     
     <style>
         body {
@@ -120,6 +140,65 @@
         const Bank = ({ className }) => <Icon className={className}><path d="M3 22h18"></path><path d="M6 18V9.52c0-1.3.8-2.47 2-2.88l4-1.6c.7-.28 1.3-.28 2 0l4 1.6c1.2.41 2 1.58 2 2.88V18"></path><path d="M6 18h12"></path><path d="M12 18V9"></path></Icon>;
         const Briefcase = ({ className }) => <Icon className={className}><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></Icon>;
         const Zap = ({ className }) => <Icon className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></Icon>;
+
+        // ErrorBoundary: catches unhandled React render errors and shows a safe fallback
+        // instead of a blank/broken page. Required because the app has no server-side fallback.
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false };
+            }
+            static getDerivedStateFromError() {
+                return { hasError: true };
+            }
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="max-w-2xl mx-auto p-8 text-center mt-20">
+                            <h2 className="text-xl font-semibold text-red-600 mb-2">Something went wrong</h2>
+                            <p className="text-gray-600">An unexpected error occurred. Please refresh the page and try again.</p>
+                        </div>
+                    );
+                }
+                return this.props.children;
+            }
+        }
+
+        // Safe renderer for improvement report — avoids dangerouslySetInnerHTML (XSS risk).
+        // Parses the report text into React elements by splitting on lines and bold markers.
+        const SafeReportRenderer = ({ report }) => {
+            const renderBold = (text) => {
+                const parts = text.split(/\*\*(.*?)\*\*/g);
+                return parts.map((part, i) =>
+                    i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+                );
+            };
+            const lines = report.split('\n');
+            const elements = [];
+            let listItems = [];
+            lines.forEach((line, idx) => {
+                if (line.startsWith('* ')) {
+                    listItems.push(
+                        <li key={idx} className="flex items-start gap-2 mb-2">
+                            <span className="mt-1 text-green-500 flex-shrink-0">&#10004;</span>
+                            <span>{renderBold(line.slice(2))}</span>
+                        </li>
+                    );
+                } else {
+                    if (listItems.length > 0) {
+                        elements.push(<ul key={`list-${idx}`} className="list-none p-0 mb-3">{listItems}</ul>);
+                        listItems = [];
+                    }
+                    if (line.trim()) {
+                        elements.push(<p key={idx} className="mb-2">{renderBold(line)}</p>);
+                    }
+                }
+            });
+            if (listItems.length > 0) {
+                elements.push(<ul key="list-end" className="list-none p-0">{listItems}</ul>);
+            }
+            return <div>{elements}</div>;
+        };
 
         const BellCurveChart = ({ userScore }) => {
             const distribution = [5, 8, 15, 22, 25, 15, 8, 2];
@@ -469,6 +548,10 @@
               return { fico: '< 620', cibil: '< 650', schufa: '< 80%' };
           };
 
+          // PPP (Purchasing Power Parity) adjustments convert nominal income to USD-equivalent
+          // purchasing power. Values are illustrative approximations based on World Bank ICP data
+          // (https://data.worldbank.org/indicator/PA.NUS.PPPC.RF). Not live rates — update periodically.
+          // country_risk: base risk premium (%) for country macro-environment (illustrative, not empirical).
           const currencyConfig = {
             USD: { symbol: '$', name: 'US Dollar', country: 'USA', ppp_adjustment: 1.0, country_risk: 0.5, score_equiv_label: 'FICO Equivalent', get_score: (s) => getScoreEquivalent(s).fico },
             EUR: { symbol: '€', name: 'Euro', country: 'Germany', ppp_adjustment: 0.82, country_risk: 0.8, score_equiv_label: 'SCHUFA Equivalent', get_score: (s) => getScoreEquivalent(s).schufa },
@@ -480,12 +563,20 @@
             industry: 6 // Default to 'Other'
           });
 
+          // Stress test country risk factors: illustrative macroeconomic shock multipliers.
+          // Represent the fraction by which a score is reduced under a severe country-level
+          // economic shock (e.g., rate hike, energy crisis). NOT derived from empirical data;
+          // values are calibrated for educational plausibility based on general economic research.
           const countryRiskScenarios = {
               USD: { name: 'USA', scenario: 'Broad Market Shock & Interest Rate Hike', risk: 0.10 },
               EUR: { name: 'Germany', scenario: 'Energy Crisis & Supply Chain Disruption', risk: 0.08 },
               INR: { name: 'India', scenario: 'Inflationary Pressure & Rupee Devaluation', risk: 0.12 }
           };
 
+          // Stress test industry risk factors: illustrative sector-specific shock multipliers.
+          // Represent the cyclicality / economic sensitivity of each industry in a severe downturn.
+          // Ordered roughly from highest to lowest volatility based on general economic principles.
+          // NOT statistically backtested — intended for educational illustration only.
           const industryRiskScenarios = {
               0: { name: 'Technology', scenario: 'Venture Capital funding dries up, major layoffs', risk: 0.15 },
               1: { name: 'Healthcare', scenario: 'Stable demand, low risk', risk: 0.02 },
@@ -536,6 +627,11 @@
             
             const breakdown = {};
             const pppAdjustedIncome = Math.max(inputs.individualIncome, inputs.familyIncome) * config.ppp_adjustment;
+            // Asset haircuts (illustrative):
+            //   Crypto: 50% — reflects high price volatility; conservative collateral treatment
+            //     similar to haircuts applied by regulated lenders (e.g., Binance margin, Basel III crypto guidance)
+            //   Bullion: 10% haircut (90% recognized) — reflects lower volatility and established
+            //     collateral value; aligned with typical pawnbroker / bank gold loan LTV ratios
             const riskAdjustedCrypto = inputs.cryptoAssets * 0.50;
             const riskAdjustedBullion = inputs.bullionAssets * 0.90;
             const totalAssets = inputs.bankSavings + inputs.equityInvestments + inputs.realEstate + riskAdjustedBullion + riskAdjustedCrypto;
@@ -544,7 +640,8 @@
             const paymentHistoryScore = (inputs.creditCardPayments * 0.30) + (inputs.loanPayments * 0.25) + (inputs.rentPayments * 0.20) + (inputs.utilityPayments * 0.15) + (inputs.governmentPayments * 0.10);
             breakdown.paymentHistory = { title: "Component 1: Payment History (40% Weight)", explanation: "This is the most critical factor. It reflects your reliability in meeting past obligations.", formula: "Weighted average of on-time payments.", calculation: `(${inputs.creditCardPayments}*0.30) + (${inputs.loanPayments}*0.25) + (${inputs.rentPayments}*0.20) + (${inputs.utilityPayments}*0.15) + (${inputs.governmentPayments}*0.10)`, result: `Score: ${formatNumber(paymentHistoryScore)} / 100`, rationale: "Weights are aligned with industry models like FICO, where timely payments on traditional credit (cards, loans) are most predictive." };
 
-            const debtToIncomeRatio = pppAdjustedIncome > 0 ? (totalDebt / pppAdjustedIncome) * 100 : Infinity;
+            // Cap at 999 when income is zero to prevent Infinity propagating through display and calculations.
+            const debtToIncomeRatio = pppAdjustedIncome > 0 ? (totalDebt / pppAdjustedIncome) * 100 : 999;
             const dtiScore = Math.max(0, 100 - (debtToIncomeRatio * 1.2));
             const leverageRatio = totalAssets > 0 ? (totalDebt / totalAssets) * 100 : 0;
             const leverageScore = Math.max(0, 100 - leverageRatio);
@@ -716,7 +813,7 @@
                             <ScoreGuide />
                             <LoanScenarios results={results} inputs={inputs} currencyConfig={currencyConfig} currency={currency} formatCurrency={formatCurrency} />
                             <ModelAssumptions />
-                            <Card><CardHeader><div className="flex items-center gap-2"><FileText className="w-5 h-5 text-gray-700" /><h3 className="text-lg font-semibold text-gray-800">Credit Improvement Report</h3></div></CardHeader><CardContent><div className="text-sm text-gray-700 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: improvementReport.replace(/\*\s(.*?)\n/g, '<li class="flex items-start gap-2 mb-2"><span class="mt-1 text-green-500">✔</span><span>$1</span></li>').replace(/<li>/g, '<ul class="list-none p-0"><li>') + '</ul>' }}></div></CardContent></Card>
+                            <Card><CardHeader><div className="flex items-center gap-2"><FileText className="w-5 h-5 text-gray-700" /><h3 className="text-lg font-semibold text-gray-800">Credit Improvement Report</h3></div></CardHeader><CardContent><div className="text-sm text-gray-700"><SafeReportRenderer report={improvementReport} /></div></CardContent></Card>
                         </div>
                     )}
                     {perspective === 'lender' && (
@@ -779,7 +876,7 @@
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        root.render(<ErrorBoundary><App /></ErrorBoundary>);
 
     </script>
 
