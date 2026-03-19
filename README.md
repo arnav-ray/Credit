@@ -86,4 +86,22 @@ Simulated Comparison: The peer comparison chart is a simulation based on publicl
 
 Professional Review Required: Always consult with a qualified financial professional and refer to your official credit report for actual lending decisions.
 
-Built with ❤️ for financial literacy and transparency.
+Built with care for financial literacy and transparency.
+
+## Privacy
+
+All calculations run entirely in your browser. No data is ever transmitted to a server, stored in a database, or shared with any third party. No cookies are set and no analytics are collected.
+
+The only external connections are:
+- CDN delivery of React 18.3.1, Babel 7.26.4, and Tailwind CSS (unpkg.com, cdn.tailwindcss.com)
+- Google Fonts (fonts.googleapis.com / fonts.gstatic.com) for the Inter typeface
+
+If you prefer zero external connections, self-host the font and pre-compile the JSX with the Babel CLI or Vite.
+
+## License
+
+This project is released under the [MIT License](LICENSE). See `LICENSE` for full terms.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the vulnerability disclosure policy and dependency information.
