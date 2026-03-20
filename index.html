@@ -237,11 +237,11 @@
 
         const ScoreGuide = () => {
             const scoreData = [
-                { platform: '85-100', category: 'Excellent', fico: '780-850', cibil: '800+', schufa: '97.5%+' },
-                { platform: '75-84', category: 'Very Good', fico: '720-779', cibil: '750-799', schufa: '95%-97.5%' },
-                { platform: '65-74', category: 'Good', fico: '680-719', cibil: '700-749', schufa: '90%-95%' },
-                { platform: '55-64', category: 'Fair', fico: '620-679', cibil: '650-699', schufa: '80%-90%' },
-                { platform: '< 55', category: 'Poor', fico: '< 620', cibil: '< 650', schufa: '< 80%' },
+                { platform: '85-100', category: 'Excellent', fico: '780-850', cibil: '800+', schufa: '900-999' },
+                { platform: '75-84', category: 'Very Good', fico: '720-779', cibil: '750-799', schufa: '800-899' },
+                { platform: '65-74', category: 'Good', fico: '680-719', cibil: '700-749', schufa: '700-799' },
+                { platform: '55-64', category: 'Fair', fico: '620-679', cibil: '650-699', schufa: '600-699' },
+                { platform: '< 55', category: 'Poor', fico: '< 620', cibil: '< 650', schufa: 'below 600' },
             ];
             const terms = {
                 "Probability of Default (PD)": "The statistical likelihood that a borrower will be unable to make their payments over the next year.",
@@ -262,7 +262,7 @@
                                         <th className="p-2 font-semibold">Category</th>
                                         <th className="p-2 font-semibold">US FICO (Approx.)</th>
                                         <th className="p-2 font-semibold">India CIBIL (Approx.)</th>
-                                        <th className="p-2 font-semibold">Germany SCHUFA (Approx.)</th>
+                                        <th className="p-2 font-semibold">Germany SCHUFA Points (Approx.)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -278,6 +278,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <p className="text-xs text-gray-500 mt-2 italic">SCHUFA migrated to a 100-999 point scale on 17 March 2026, replacing the previous percentage-based Basisscore. Approximate mapping only - OpenCredit and SCHUFA use fundamentally different methodologies.</p>
                         <h4 className="text-md font-semibold text-gray-800 mt-6 mb-2">Key Financial Terms</h4>
                         <div className="space-y-2">
                             {Object.entries(terms).map(([term, def]) => (
@@ -317,9 +318,9 @@
 
             return (
                 <Card>
-                    <CardHeader><h3 className="text-lg font-semibold text-gray-800">Potential Borrowing Scenarios</h3></CardHeader>
+                    <CardHeader><h3 className="text-lg font-semibold text-gray-800">Score Simulator: What Could Change?</h3></CardHeader>
                     <CardContent className="space-y-4">
-                        <p className="text-sm text-gray-600">Based on your profile, here are some estimated scenarios. These are for illustrative purposes only and are not a guarantee of credit.</p>
+                        <p className="text-sm text-gray-600">Adjust your inputs above and recalculate to simulate how changes to your financial behaviour could affect your borrowing capacity. These are illustrative estimates based on your profile - not guarantees of credit approval.</p>
                         
                         <div className="p-3 bg-gray-50 rounded-lg border">
                             <h4 className="font-semibold text-gray-800">Unsecured Personal Loan</h4>
@@ -509,6 +510,11 @@
                     <div>
                         <h4 className="font-semibold text-gray-800 mb-1">The Problem: Credit is a Black Box</h4>
                         <p>For most people, credit scores are confusing numbers assigned by opaque agencies. It's often unclear how these scores are calculated, what factors are most important, and what specific, actionable steps can be taken to improve them. This lack of transparency creates anxiety for borrowers and can lead to inefficient decision-making for lenders who rely solely on traditional metrics.</p>
+                        <div className="bg-blue-50 border-l-4 border-blue-400 rounded-r-lg p-3 mt-3 text-sm">
+                            <span>This is no longer just a theory. In March 2026, SCHUFA - Germany's largest credit bureau - was compelled by a European Court of Justice ruling to replace its opaque model (which used up to 100 criteria consumers could not see or verify) with a new transparent 12-criteria system. Consumers had previously been unable to understand or challenge how their scores were calculated. This platform was built in 2025 on exactly that premise, before the reform happened.</span>
+                            <br />
+                            <a href="https://www.schufa.de/newsroom/pressemitteilungen/neue-schufa-score-transparent-leicht-nachzurechnen/index.jsp" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline text-xs font-medium">Read SCHUFA's official announcement (March 2026)</a>
+                        </div>
                     </div>
                     <div>
                         <h4 className="font-semibold text-gray-800 mb-1">The Solution: A Transparent, Educational Model</h4>
@@ -517,6 +523,19 @@
                             <li><strong>For Individuals (Borrower View):</strong> To learn about the key drivers of creditworthiness, receive a personalized improvement plan, and understand how lenders might perceive their financial health before they apply for credit.</li>
                             <li><strong>For Professionals & Students (Lender View):</strong> To explore a simplified, Basel III-aligned risk model, understand concepts like Probability of Default (PD) and Expected Loss (EL), and see how macroeconomic stress testing can impact a borrower's profile.</li>
                         </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-gray-800 mb-1">Beyond What SCHUFA Still Does Not Measure</h4>
+                        <p>Even SCHUFA's reformed model remains limited to credit transaction history: which accounts exist, whether payments were missed, and how many credit applications were made. It does not incorporate income, savings, cash flow, financial habits, or any forward-looking indicators.</p>
+                        <p className="mt-2">OpenCredit was designed from the start around a different question entirely. It incorporates:</p>
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li>Cash flow and income stability - the most direct measure of actual repayment capacity</li>
+                            <li>Emergency fund depth - a borrower's buffer against unexpected financial shocks</li>
+                            <li>Behavioural economics signals - budgeting habits, financial goal-setting, and proactive planning</li>
+                            <li>Alternative assets with risk-adjusted treatment (crypto at 50%, bullion at 90%)</li>
+                            <li>Macroeconomic and sector-specific stress testing - forward-looking risk, not just historical payment data</li>
+                        </ul>
+                        <div className="bg-green-50 border-l-4 border-green-400 rounded-r-lg p-3 mt-3 text-sm text-green-900">Traditional bureaus score what happened in the past. This model asks: given your full financial picture today, how resilient are you to what could happen tomorrow?</div>
                     </div>
                     <div>
                         <h4 className="font-semibold text-gray-800 mb-1">Key Parameters & Assumptions</h4>
@@ -531,6 +550,84 @@
                 </CardContent>
             </Card>
         );
+
+        const SchufaSimulator = ({ schufaInputs, setSchufaInputs, schufaResult, handleCalculateSchufa, openCreditScore }) => {
+            const { useState: useLocalState } = React;
+            const SliderSimple = ({ label, value, onChange, min, max, helpText }) => (
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium text-gray-800">{label}</label>
+                        <span className="text-sm font-mono text-gray-700 border border-gray-300 rounded px-2 py-0.5 bg-gray-50">{value}</span>
+                    </div>
+                    <input type="range" min={min} max={max} step="1" value={value} onChange={(e) => onChange(parseInt(e.target.value, 10))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                    {helpText && <div className="text-xs text-gray-500">{helpText}</div>}
+                </div>
+            );
+            return (
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-orange-500" />
+                            <h3 className="text-lg font-semibold text-gray-800">SCHUFA Score Simulator (Estimated)</h3>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-xs text-orange-800 mb-5">
+                            SCHUFA published its 12 scoring criteria in March 2026 but has not released its weights or formula. The scoring logic below uses estimated weights derived from general credit risk principles. This simulator is an independent educational tool with no affiliation to SCHUFA. Your actual SCHUFA score will differ. The purpose here is to illustrate how a bureau-data-only model reaches different conclusions than a full financial picture model.
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-800">
+                                    <input type="checkbox" checked={schufaInputs.hasNegativeEntry} onChange={(e) => setSchufaInputs({...schufaInputs, hasNegativeEntry: e.target.checked})} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+                                    Has negative payment entry (Negativmerkmal)
+                                </label>
+                            </div>
+                            {schufaInputs.hasNegativeEntry && (
+                                <SliderSimple label="Months since negative entry" value={schufaInputs.monthsSinceNegativeEntry} onChange={(val) => setSchufaInputs({...schufaInputs, monthsSinceNegativeEntry: val})} min={0} max={60} helpText="Negative entries carry less weight over time." />
+                            )}
+                            <SliderSimple label="Age of oldest credit account (years)" value={schufaInputs.oldestAccountAgeYears} onChange={(val) => setSchufaInputs({...schufaInputs, oldestAccountAgeYears: val})} min={0} max={25} helpText="Longer credit history signals stability." />
+                            <SliderSimple label="Years at current address" value={schufaInputs.currentAddressYears} onChange={(val) => setSchufaInputs({...schufaInputs, currentAddressYears: val})} min={0} max={20} helpText="Address stability is a positive signal in bureau scoring." />
+                            <SliderSimple label="Credit card and giro applications (last 12 months)" value={schufaInputs.creditApplicationsLast12Months} onChange={(val) => setSchufaInputs({...schufaInputs, creditApplicationsLast12Months: val})} min={0} max={10} helpText="Frequent applications suggest credit-seeking behaviour." />
+                            <SliderSimple label="Non-bank credit applications (last 12 months)" value={schufaInputs.nonBankApplicationsLast12Months} onChange={(val) => setSchufaInputs({...schufaInputs, nonBankApplicationsLast12Months: val})} min={0} max={10} helpText="Includes mail-order credit, buy-now-pay-later, etc." />
+                            <SliderSimple label="Instalment loans taken (last 12 months)" value={schufaInputs.instalmentLoansTaken12Months} onChange={(val) => setSchufaInputs({...schufaInputs, instalmentLoansTaken12Months: val})} min={0} max={5} helpText="New loan obligations reduce estimated creditworthiness." />
+                            <SliderSimple label="Number of active credit accounts" value={schufaInputs.activeAccounts} onChange={(val) => setSchufaInputs({...schufaInputs, activeAccounts: val})} min={0} max={15} helpText="A moderate number of well-managed accounts is positive." />
+                            <div className="space-y-2">
+                                <label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-800">
+                                    <input type="checkbox" checked={schufaInputs.hasInsolvency} onChange={(e) => setSchufaInputs({...schufaInputs, hasInsolvency: e.target.checked})} className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" />
+                                    Has insolvency entry
+                                </label>
+                                <div className="text-xs text-gray-500 pl-6">Insolvency entries have the most severe negative impact.</div>
+                            </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">These inputs represent what SCHUFA actually holds: bureau records of credit behaviour. Notice what is missing compared to the main OpenCredit model: no income, no assets, no savings, no spending habits, no financial goals.</p>
+                        <div className="flex justify-center mt-4">
+                            <button onClick={handleCalculateSchufa} className="w-full md:w-auto px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Estimate SCHUFA Score</button>
+                        </div>
+                        {schufaResult !== null && (
+                            <div>
+                                <div className="grid grid-cols-3 gap-4 mt-6 items-center text-center">
+                                    <div className="bg-gray-100 rounded-lg p-4">
+                                        <div className="text-sm text-gray-500">OpenCredit Score</div>
+                                        <div className="text-4xl font-bold text-gray-800">{openCreditScore}</div>
+                                        <div className="text-xs text-gray-400">out of 100</div>
+                                    </div>
+                                    <div className="text-gray-400 text-xl font-light">vs</div>
+                                    <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
+                                        <div className="text-sm text-indigo-500">Estimated SCHUFA</div>
+                                        <div className={`text-4xl font-bold ${schufaResult.bandColor}`}>{schufaResult.score}</div>
+                                        <div className={`text-xs ${schufaResult.bandColor}`}>{schufaResult.band}</div>
+                                        <div className="text-xs text-gray-400">out of 999</div>
+                                    </div>
+                                </div>
+                                <div className="bg-blue-50 border-l-4 border-blue-400 rounded-r-lg p-3 mt-4 text-sm text-blue-900">
+                                    OpenCredit scores your full financial picture: income, assets, savings, behaviour, and resilience. SCHUFA scores your credit account history only. The same person can look very different under each model - especially if they are asset-rich but credit-thin, recently relocated, or early in their credit history.
+                                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            );
+        };
 
         function App() {
           const { useState, useEffect } = React;
@@ -593,6 +690,57 @@
           
           const [calculationBreakdown, setCalculationBreakdown] = useState(null);
           const [improvementReport, setImprovementReport] = useState("");
+
+          const [schufaInputs, setSchufaInputs] = useState({
+            hasNegativeEntry: false,
+            monthsSinceNegativeEntry: 0,
+            oldestAccountAgeYears: 5,
+            currentAddressYears: 3,
+            creditApplicationsLast12Months: 1,
+            nonBankApplicationsLast12Months: 0,
+            instalmentLoansTaken12Months: 0,
+            activeAccounts: 2,
+            hasInsolvency: false,
+          });
+
+          const [schufaResult, setSchufaResult] = useState(null);
+
+          const calculateSchufaScore = (si) => {
+            let score = 800;
+            if (si.hasInsolvency) score -= 600;
+            if (si.hasNegativeEntry) {
+              if (si.monthsSinceNegativeEntry < 12) score -= 200;
+              else if (si.monthsSinceNegativeEntry < 36) score -= 120;
+              else if (si.monthsSinceNegativeEntry < 48) score -= 60;
+              else score -= 20;
+            }
+            if (si.creditApplicationsLast12Months === 0) score += 20;
+            else if (si.creditApplicationsLast12Months === 2) score -= 15;
+            else if (si.creditApplicationsLast12Months === 3) score -= 35;
+            else if (si.creditApplicationsLast12Months >= 4) score -= 60;
+            if (si.nonBankApplicationsLast12Months >= 3) score -= 30;
+            else if (si.nonBankApplicationsLast12Months >= 1) score -= 10;
+            if (si.instalmentLoansTaken12Months >= 2) score -= 50;
+            else if (si.instalmentLoansTaken12Months === 1) score -= 20;
+            if (si.oldestAccountAgeYears >= 10) score += 40;
+            else if (si.oldestAccountAgeYears >= 5) score += 20;
+            else if (si.oldestAccountAgeYears < 2) score -= 30;
+            if (si.currentAddressYears >= 5) score += 20;
+            else if (si.currentAddressYears >= 2) score += 10;
+            else if (si.currentAddressYears < 1) score -= 20;
+            if (si.activeAccounts >= 7) score -= 20;
+            else if (si.activeAccounts >= 1 && si.activeAccounts <= 3) score += 10;
+            score = Math.max(100, Math.min(999, score));
+            let band, bandColor;
+            if (score >= 900) { band = "Sehr gut"; bandColor = "text-green-600"; }
+            else if (score >= 800) { band = "Gut"; bandColor = "text-blue-600"; }
+            else if (score >= 700) { band = "Befriedigend"; bandColor = "text-yellow-600"; }
+            else if (score >= 600) { band = "Ausreichend"; bandColor = "text-orange-600"; }
+            else { band = "Mangelhaft"; bandColor = "text-red-600"; }
+            return { score, band, bandColor };
+          };
+
+          const handleCalculateSchufa = () => setSchufaResult(calculateSchufaScore(schufaInputs));
 
           const formatCurrency = (amount) => currencyConfig[currency].symbol + Math.round(amount).toLocaleString();
           const formatNumber = (num, places = 2) => parseFloat(num.toFixed(places));
@@ -850,6 +998,7 @@
                              </Card>
                         </div>
                     )}
+                    <SchufaSimulator schufaInputs={schufaInputs} setSchufaInputs={setSchufaInputs} schufaResult={schufaResult} handleCalculateSchufa={handleCalculateSchufa} openCreditScore={results.overallRiskScore} />
                 </div>
               )}
               {hasCalculated && activeTab === 'model logic' && (<div className="space-y-4">
@@ -857,6 +1006,34 @@
                   <DetailedCalculationStep data={calculationBreakdown.financialHealth} />
                   <DetailedCalculationStep data={calculationBreakdown.behavioral} />
                   <DetailedCalculationStep data={calculationBreakdown.finalScore} />
+                  <Card>
+                      <CardHeader><h3 className="text-lg font-semibold text-gray-800">OpenCredit vs. New SCHUFA 12-Criteria Model</h3></CardHeader>
+                      <CardContent>
+                          <p className="text-sm text-gray-600 mb-4">This table shows where OpenCredit and SCHUFA's new model care about the same underlying risks - and where they diverge. The overlap is thematic, not mathematical. SCHUFA derives its weights statistically from millions of real default outcomes. OpenCredit's weights are manually calibrated from published FICO methodology principles. They are different models asking similar questions through different lenses.</p>
+                          <div className="overflow-x-auto">
+                              <table className="w-full text-sm text-left">
+                                  <thead className="bg-gray-100">
+                                      <tr>
+                                          <th className="p-2 font-semibold">SCHUFA Criterion</th>
+                                          <th className="p-2 font-semibold">SCHUFA Data Source</th>
+                                          <th className="p-2 font-semibold">OpenCredit Coverage</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      <tr className="border-b"><td className="p-2">Payment defaults (Negativmerkmale)</td><td className="p-2">Bureau records</td><td className="p-2">Payment History component (40% weight)</td></tr>
+                                      <tr className="border-b"><td className="p-2">Insolvency entries</td><td className="p-2">Court and bureau records</td><td className="p-2">Not modelled - no bureau data used by design</td></tr>
+                                      <tr className="border-b"><td className="p-2">Age of oldest credit account</td><td className="p-2">Bureau records</td><td className="p-2">Employment tenure and residency stability used as proxies</td></tr>
+                                      <tr className="border-b"><td className="p-2">Years at current address</td><td className="p-2">Bureau records</td><td className="p-2">Residency status input in Demographics tab</td></tr>
+                                      <tr className="border-b"><td className="p-2">Credit card and giro applications (12 months)</td><td className="p-2">Bureau enquiry records</td><td className="p-2">Not modelled - no bureau data used by design</td></tr>
+                                      <tr className="border-b"><td className="p-2">Non-bank credit applications (12 months)</td><td className="p-2">Bureau enquiry records</td><td className="p-2">Not modelled - no bureau data used by design</td></tr>
+                                      <tr className="border-b"><td className="p-2">Instalment loans taken (12 months)</td><td className="p-2">Bureau records</td><td className="p-2">Captured in secured and unsecured debt inputs</td></tr>
+                                      <tr className="border-b"><td className="p-2">Number of active credit accounts</td><td className="p-2">Bureau records</td><td className="p-2">Partially captured via unsecured debt and credit card payment inputs</td></tr>
+                                  </tbody>
+                              </table>
+                          </div>
+                          <div className="bg-yellow-50 border border-yellow-200 rounded p-3 text-xs text-yellow-800 mt-4">OpenCredit additionally models income, assets, cash flow, emergency fund depth, budgeting habits, financial goals, and macroeconomic stress - dimensions the SCHUFA model does not include because it only holds bureau data, not the full financial picture of a borrower.</div>
+                      </CardContent>
+                  </Card>
               </div>)}
               
               <div className="mt-8 p-4 border-t-4 border-yellow-400 bg-yellow-50 rounded-lg text-center">
