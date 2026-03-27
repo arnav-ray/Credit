@@ -17,6 +17,7 @@
         connect-src 'none';
         object-src 'none';
         base-uri 'self';
+        frame-ancestors 'none';
     ">
     
     <!-- Tailwind CSS (CDN). Note: SRI is not supported on the Tailwind Play CDN because
@@ -901,7 +902,7 @@
           return (
             <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 bg-gray-50 min-h-screen">
               <div className="text-center mb-8">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2"><a href="https://arnavray.ca" target="_blank" className="hover:text-blue-600 transition-colors">OpenCredit Platform</a></h1>
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2"><a href="https://arnavray.ca" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">OpenCredit Platform</a></h1>
                 <p className="text-gray-600 mb-4 max-w-2xl mx-auto">An open-source, research-based credit risk model with full transparency.</p>
                 
                 <div className="flex justify-center items-center gap-4 mb-6">
@@ -1046,7 +1047,7 @@
                 </p>
               </div>
               <footer className="text-center mt-8 text-sm text-gray-500">
-                <p>Copyright 2025 <a href="https://arnavray.ca" target="_blank" className="text-blue-600 hover:underline">Arnav Amal Ray</a> | <a href="mailto:arnav@arnavray.ca" className="text-blue-600 hover:underline">arnav@arnavray.ca</a></p>
+                <p>Copyright 2025 <a href="https://arnavray.ca" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Arnav Amal Ray</a> | <a href="mailto:arnav@arnavray.ca" className="text-blue-600 hover:underline">arnav@arnavray.ca</a></p>
               </footer>
             </div>
           );

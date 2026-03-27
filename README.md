@@ -169,7 +169,7 @@ If you prefer zero external connections, self-host the font and pre-compile the 
 
 ## License
 
-This project is released under the [MIT License](LICENSE). See `LICENSE` for full terms.
+This project is released under the [Apache License 2.0](LICENSE). See `LICENSE` for full terms.
 
 ## Security
 

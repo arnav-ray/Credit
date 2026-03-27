@@ -26,13 +26,24 @@ Please include:
 
 We ask that you do **not** publicly disclose the issue until we have had a reasonable opportunity to investigate and release a fix.
 
-## Known Non-Issues
+## Security Audit Summary (March 2026)
 
-The following are known architectural trade-offs, not vulnerabilities:
+A full security review was conducted on the codebase. Key findings and mitigations:
 
-- **Babel Standalone in browser**: JSX is compiled at runtime. This requires `unsafe-eval` in the Content Security Policy. For higher-security deployments, pre-compile JSX with the Babel CLI or Vite.
-- **Tailwind Play CDN**: The Tailwind CDN generates CSS dynamically and does not support Subresource Integrity (SRI). Use the Tailwind CLI for production builds.
-- **Google Fonts**: Loading Inter font from `fonts.googleapis.com` / `fonts.gstatic.com` creates a connection to Google's servers. If this is undesirable, self-host the font files instead.
+### Known Architectural Trade-offs (Not Vulnerabilities)
+
+- **Babel Standalone / `unsafe-eval`**: JSX is compiled at runtime. This requires `unsafe-eval` in the Content Security Policy. For higher-security deployments, pre-compile JSX with the Babel CLI or Vite to eliminate this attack surface entirely.
+- **Tailwind Play CDN / `unsafe-inline`**: The Tailwind CDN generates CSS dynamically and does not support Subresource Integrity (SRI). Use the Tailwind CLI for production builds.
+- **CDN scripts without SRI hashes**: React 18.3.1 and Babel 7.26.4 are loaded from unpkg.com without SRI verification. To add SRI, download each file and compute: `openssl dgst -sha384 -binary <file> | openssl base64 -A`, then add as `integrity="sha384-<hash>"` attributes. Tailwind CDN does not support SRI.
+- **Google Fonts**: Loading Inter from `fonts.googleapis.com` / `fonts.gstatic.com` creates a connection to Google's servers. Self-host the font files to eliminate this dependency.
+
+### Mitigations Applied
+
+- **Content Security Policy**: Declared via `<meta http-equiv>` with `connect-src 'none'` (no external API calls), `object-src 'none'`, `base-uri 'self'`, and `frame-ancestors 'none'` (clickjacking protection).
+- **External links**: All `target="_blank"` links include `rel="noopener noreferrer"` to prevent tab-napping.
+- **No `dangerouslySetInnerHTML`**: React renders report content via safe component parsing only.
+- **No persistent storage**: No `localStorage`, `sessionStorage`, cookies, or server-side storage. All data is ephemeral in memory.
+- **No hardcoded secrets**: No API keys, tokens, or credentials in source.
 
 ## Data Privacy
 
@@ -51,8 +62,6 @@ The following are known architectural trade-offs, not vulnerabilities:
 | Tailwind CSS | Latest (Play CDN) | cdn.tailwindcss.com |
 | Inter font | Latest | fonts.googleapis.com |
 
-To verify integrity of pinned CDN scripts, download each file and compute:
-```
-openssl dgst -sha384 -binary <file> | openssl base64 -A
-```
-Then add the resulting hash as an `integrity="sha384-<hash>"` attribute on each `<script>` tag.
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
