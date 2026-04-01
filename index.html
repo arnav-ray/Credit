@@ -202,10 +202,12 @@
         };
 
         const BellCurveChart = ({ userScore }) => {
-            const distribution = [5, 8, 15, 22, 25, 15, 8, 2];
-            const labels = ['<45', '45-55', '55-65', '65-75', '75-85', '85-95', '95-100', '>100'];
+            // Scores are capped at 100; the '>100' bucket is unreachable and removed.
+            // The 2% previously allocated to it is merged into the '95-100' bucket.
+            const distribution = [5, 8, 15, 22, 25, 15, 10];
+            const labels = ['<45', '45-55', '55-65', '65-75', '75-85', '85-95', '95-100'];
             const getBucketIndex = (score) => {
-                if (score < 45) return 0; if (score < 55) return 1; if (score < 65) return 2; if (score < 75) return 3; if (score < 85) return 4; if (score < 95) return 5; if (score <= 100) return 6; return 7;
+                if (score < 45) return 0; if (score < 55) return 1; if (score < 65) return 2; if (score < 75) return 3; if (score < 85) return 4; if (score < 95) return 5; return 6;
             };
             const userBucketIndex = getBucketIndex(userScore);
             return (
@@ -638,12 +640,14 @@
           const [hasCalculated, setHasCalculated] = useState(false);
           const [stressResults, setStressResults] = useState(null);
 
+          // SCHUFA migrated to a 100-999 point scale on 17 March 2026 (ECJ ruling).
+          // Old percentage-based Basisscore is no longer used.
           const getScoreEquivalent = (score) => {
-              if (score >= 85) return { fico: '780-850', cibil: '800+', schufa: '97.5%+' };
-              if (score >= 75) return { fico: '720-779', cibil: '750-799', schufa: '95%-97.5%' };
-              if (score >= 65) return { fico: '680-719', cibil: '700-749', schufa: '90%-95%' };
-              if (score >= 55) return { fico: '620-679', cibil: '650-699', schufa: '80%-90%' };
-              return { fico: '< 620', cibil: '< 650', schufa: '< 80%' };
+              if (score >= 85) return { fico: '780-850', cibil: '800+', schufa: '900-999' };
+              if (score >= 75) return { fico: '720-779', cibil: '750-799', schufa: '800-899' };
+              if (score >= 65) return { fico: '680-719', cibil: '700-749', schufa: '700-799' };
+              if (score >= 55) return { fico: '620-679', cibil: '650-699', schufa: '600-699' };
+              return { fico: '< 620', cibil: '< 650', schufa: 'below 600' };
           };
 
           // PPP (Purchasing Power Parity) adjustments convert nominal income to USD-equivalent

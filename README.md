@@ -74,6 +74,7 @@ An educational simulator built on SCHUFA's publicly announced 12 criteria (March
 - **Interface:** React 18 (run via in-browser Babel compiler)
 - **Styling:** Tailwind CSS (loaded via CDN)
 - **Visualizations:** Inline SVG components
+- **Deployment:** Vercel (with server-side security headers via `vercel.json`)
 
 ## Risk Assessment Methodology
 
@@ -131,11 +132,9 @@ The bell curve chart is a realistic simulation based on publicly available stati
 
 ## How to Use
 
-This application is a single, self-contained HTML file. No installation required.
+**Online:** The platform is deployed on Vercel. Open it in any modern web browser — no installation required.
 
-1. Save the code from `index.html`
-2. Paste into a new text file and save as `index.html`
-3. Open in any modern web browser (Chrome, Firefox, Edge)
+**Locally:** Clone the repository and open `index.html` directly in Chrome, Firefox, or Edge. No build step needed.
 
 ## Model Assumptions and Limitations
 
