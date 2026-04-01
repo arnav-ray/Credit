@@ -26,31 +26,63 @@ Please include:
 
 We ask that you do **not** publicly disclose the issue until we have had a reasonable opportunity to investigate and release a fix.
 
-## Security Audit Summary (March 2026)
+## Deployment
 
-A full security review was conducted on the codebase. Key findings and mitigations:
+The platform is deployed via **Vercel**. HTTP security headers are enforced server-side via `vercel.json`:
 
-### Known Architectural Trade-offs (Not Vulnerabilities)
+| Header | Value |
+|--------|-------|
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains; preload` |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
 
-- **Babel Standalone / `unsafe-eval`**: JSX is compiled at runtime. This requires `unsafe-eval` in the Content Security Policy. For higher-security deployments, pre-compile JSX with the Babel CLI or Vite to eliminate this attack surface entirely.
-- **Tailwind Play CDN / `unsafe-inline`**: The Tailwind CDN generates CSS dynamically and does not support Subresource Integrity (SRI). Use the Tailwind CLI for production builds.
-- **CDN scripts without SRI hashes**: React 18.3.1 and Babel 7.26.4 are loaded from unpkg.com without SRI verification. To add SRI, download each file and compute: `openssl dgst -sha384 -binary <file> | openssl base64 -A`, then add as `integrity="sha384-<hash>"` attributes. Tailwind CDN does not support SRI.
-- **Google Fonts**: Loading Inter from `fonts.googleapis.com` / `fonts.gstatic.com` creates a connection to Google's servers. Self-host the font files to eliminate this dependency.
+The in-page Content Security Policy (`<meta http-equiv="Content-Security-Policy">`) additionally enforces:
 
-### Mitigations Applied
+| Directive | Value | Purpose |
+|-----------|-------|---------|
+| `default-src` | `'self'` | Blocks all unlisted sources by default |
+| `connect-src` | `'none'` | Prevents all outbound API calls — no data exfiltration possible |
+| `object-src` | `'none'` | Blocks Flash and other plugin content |
+| `base-uri` | `'self'` | Prevents base tag injection |
+| `frame-ancestors` | `'none'` | Blocks iframe embedding / clickjacking |
 
-- **Content Security Policy**: Declared via `<meta http-equiv>` with `connect-src 'none'` (no external API calls), `object-src 'none'`, `base-uri 'self'`, and `frame-ancestors 'none'` (clickjacking protection).
-- **External links**: All `target="_blank"` links include `rel="noopener noreferrer"` to prevent tab-napping.
-- **No `dangerouslySetInnerHTML`**: React renders report content via safe component parsing only.
-- **No persistent storage**: No `localStorage`, `sessionStorage`, cookies, or server-side storage. All data is ephemeral in memory.
-- **No hardcoded secrets**: No API keys, tokens, or credentials in source.
+## Known Architectural Trade-offs
+
+The following are deliberate trade-offs for a CDN-hosted, build-tooling-free deployment. They are not exploitable vulnerabilities in the current threat model (client-side only, no sensitive server state), but would need to be resolved before any production backend integration.
+
+### Babel Standalone / `unsafe-eval`
+JSX is compiled at runtime in the browser by Babel Standalone. This requires `unsafe-eval` in the CSP, which significantly weakens its XSS protections. **For higher-security deployments**, pre-compile JSX with the Babel CLI or Vite and remove this dependency entirely.
+
+### Tailwind Play CDN / `unsafe-inline`
+The Tailwind CDN injects styles dynamically and does not support Subresource Integrity (SRI). This requires `unsafe-inline` in `style-src`. **For production**, use the Tailwind CLI to generate a static CSS bundle with an SRI hash.
+
+### CDN Scripts Without SRI Hashes
+React 18.3.1, ReactDOM 18.3.1, and Babel Standalone 7.26.4 are loaded from `unpkg.com` without `integrity=` attributes. A compromised CDN or BGP hijack could inject malicious code. To add SRI:
+
+```sh
+openssl dgst -sha384 -binary <downloaded-file> | openssl base64 -A
+```
+
+Then add `integrity="sha384-<hash>"` to each `<script>` tag. Note: Tailwind's Play CDN does not support SRI.
+
+### Google Fonts
+The Inter typeface is loaded from `fonts.googleapis.com` / `fonts.gstatic.com`. This creates a connection to Google's servers on each page load, which has privacy implications (Google receives referrer data). To eliminate this dependency, self-host the Inter font files.
+
+## Security Practices in Place
+
+- **No `dangerouslySetInnerHTML`**: All dynamic content is rendered via safe React component parsing.
+- **No persistent storage**: No `localStorage`, `sessionStorage`, cookies, or server-side storage. All state is ephemeral in browser memory.
+- **No hardcoded secrets**: No API keys, tokens, or credentials anywhere in the source.
+- **All external links** use `rel="noopener noreferrer"` on `target="_blank"` to prevent tab-napping.
+- **Error boundary**: A React `ErrorBoundary` wraps the entire application to prevent unhandled render errors from exposing internal state to the user.
 
 ## Data Privacy
 
 - No personal data ever leaves your browser.
 - No cookies are set.
 - No analytics, tracking pixels, or third-party data collectors are used.
-- The only external connections are: CDN libraries (React, Babel, Tailwind) and Google Fonts.
+- External connections are limited to: CDN delivery of React, Babel, and Tailwind; and Google Fonts.
 
 ## Third-Party Dependencies
 
